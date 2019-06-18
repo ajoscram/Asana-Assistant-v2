@@ -43,9 +43,9 @@ public class UserFrame extends javax.swing.JFrame {
         LogoLabel = new javax.swing.JLabel();
         CollaboratorsTabbedPane = new javax.swing.JTabbedPane();
         ActiveScrollPane = new javax.swing.JScrollPane();
-        jList3 = new javax.swing.JList<>();
+        ActiveList = new javax.swing.JList<>();
         BannedScrollPane = new javax.swing.JScrollPane();
-        jList4 = new javax.swing.JList<>();
+        BannedList = new javax.swing.JList<>();
         SincronizeIcon = new javax.swing.JLabel();
         NombreFiltrosPanel = new javax.swing.JPanel();
         NombreProyectoLabel = new javax.swing.JLabel();
@@ -60,8 +60,8 @@ public class UserFrame extends javax.swing.JFrame {
         ByCollaboratorSeparator = new javax.swing.JSeparator();
         ByActivitySeparator = new javax.swing.JSeparator();
         ByDateSeparator = new javax.swing.JSeparator();
-        jComboBox1 = new javax.swing.JComboBox<>();
-        jComboBox2 = new javax.swing.JComboBox<>();
+        TaskComboBox = new javax.swing.JComboBox<>();
+        CollaboratorComboBox = new javax.swing.JComboBox<>();
         jSeparator1 = new javax.swing.JSeparator();
         TasksPanel = new javax.swing.JPanel();
         TreeTaskScrollPane = new javax.swing.JScrollPane();
@@ -137,16 +137,16 @@ public class UserFrame extends javax.swing.JFrame {
         ActiveScrollPane.setForeground(new java.awt.Color(85, 96, 115));
         ActiveScrollPane.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
 
-        jList3.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
-        jList3.setForeground(new java.awt.Color(85, 96, 115));
-        jList3.setModel(new javax.swing.AbstractListModel<String>() {
+        ActiveList.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
+        ActiveList.setForeground(new java.awt.Color(85, 96, 115));
+        ActiveList.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
-        jList3.setSelectionBackground(new java.awt.Color(255, 102, 0));
-        jList3.setSelectionForeground(new java.awt.Color(243, 242, 242));
-        ActiveScrollPane.setViewportView(jList3);
+        ActiveList.setSelectionBackground(new java.awt.Color(255, 102, 0));
+        ActiveList.setSelectionForeground(new java.awt.Color(243, 242, 242));
+        ActiveScrollPane.setViewportView(ActiveList);
 
         CollaboratorsTabbedPane.addTab("Active", ActiveScrollPane);
 
@@ -154,16 +154,16 @@ public class UserFrame extends javax.swing.JFrame {
         BannedScrollPane.setForeground(new java.awt.Color(85, 96, 115));
         BannedScrollPane.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
 
-        jList4.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
-        jList4.setForeground(new java.awt.Color(85, 96, 115));
-        jList4.setModel(new javax.swing.AbstractListModel<String>() {
+        BannedList.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
+        BannedList.setForeground(new java.awt.Color(85, 96, 115));
+        BannedList.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
-        jList4.setSelectionBackground(new java.awt.Color(255, 102, 0));
-        jList4.setSelectionForeground(new java.awt.Color(243, 242, 242));
-        BannedScrollPane.setViewportView(jList4);
+        BannedList.setSelectionBackground(new java.awt.Color(255, 102, 0));
+        BannedList.setSelectionForeground(new java.awt.Color(243, 242, 242));
+        BannedScrollPane.setViewportView(BannedList);
 
         CollaboratorsTabbedPane.addTab("Banned", BannedScrollPane);
 
@@ -222,7 +222,7 @@ public class UserFrame extends javax.swing.JFrame {
 
         NombreProyectoLabel.setFont(new java.awt.Font("Proxima Nova Rg", 1, 36)); // NOI18N
         NombreProyectoLabel.setForeground(new java.awt.Color(29, 38, 52));
-        NombreProyectoLabel.setText("Nombre del Proyecto");
+        NombreProyectoLabel.setText("Name Of Project");
 
         ByActivityIcon.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
         ByActivityIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/bytask.png"))); // NOI18N
@@ -272,9 +272,9 @@ public class UserFrame extends javax.swing.JFrame {
 
         ByDateSeparator.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        TaskComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        CollaboratorComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         javax.swing.GroupLayout NombreFiltrosPanelLayout = new javax.swing.GroupLayout(NombreFiltrosPanel);
         NombreFiltrosPanel.setLayout(NombreFiltrosPanelLayout);
@@ -303,13 +303,13 @@ public class UserFrame extends javax.swing.JFrame {
                         .addGap(0, 0, 0)
                         .addComponent(ByActivityIcon, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(TaskComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(ByCollaboratorSeparator, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(0, 0, 0)
                 .addComponent(ByCollaboratorIcon)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(CollaboratorComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
             .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
         );
@@ -330,8 +330,8 @@ public class UserFrame extends javax.swing.JFrame {
                     .addComponent(FiltersLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(ByActivitySeparator, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
                     .addComponent(ByDateSeparator)
-                    .addComponent(jComboBox1)
-                    .addComponent(jComboBox2, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(TaskComboBox)
+                    .addComponent(CollaboratorComboBox, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(ByCollaboratorIcon, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(29, 29, 29)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -352,17 +352,17 @@ public class UserFrame extends javax.swing.JFrame {
         );
         TasksPanelLayout.setVerticalGroup(
             TasksPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(TreeTaskScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 589, Short.MAX_VALUE)
+            .addComponent(TreeTaskScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE)
         );
 
         InfoCalendarPanel.setBackground(new java.awt.Color(214, 217, 225));
 
         calendar.setForeground(new java.awt.Color(29, 38, 52));
         calendar.setDecorationBackgroundColor(new java.awt.Color(85, 96, 115));
-        calendar.setDecorationBackgroundVisible(false);
         calendar.setSundayForeground(new java.awt.Color(255, 102, 0));
         calendar.setWeekdayForeground(new java.awt.Color(255, 255, 255));
 
+        jList1.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
         jList1.setForeground(new java.awt.Color(85, 96, 115));
         jList1.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
@@ -373,6 +373,7 @@ public class UserFrame extends javax.swing.JFrame {
         jList1.setSelectionForeground(new java.awt.Color(243, 242, 242));
         DevelopmentsScrollpane.setViewportView(jList1);
 
+        jList2.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
         jList2.setForeground(new java.awt.Color(85, 96, 115));
         jList2.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
@@ -386,12 +387,12 @@ public class UserFrame extends javax.swing.JFrame {
         AsignadoLabel.setFont(new java.awt.Font("Proxima Nova Rg", 1, 18)); // NOI18N
         AsignadoLabel.setForeground(new java.awt.Color(85, 96, 115));
         AsignadoLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        AsignadoLabel.setText("Asignado");
+        AsignadoLabel.setText("Asignee");
 
         NombreTareaLabel.setFont(new java.awt.Font("Proxima Nova Rg", 1, 18)); // NOI18N
         NombreTareaLabel.setForeground(new java.awt.Color(85, 96, 115));
         NombreTareaLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        NombreTareaLabel.setText("Nombre Tarea");
+        NombreTareaLabel.setText("Name Of Task");
 
         DevelopmentsLabel.setFont(new java.awt.Font("Proxima Nova Rg", 1, 18)); // NOI18N
         DevelopmentsLabel.setForeground(new java.awt.Color(85, 96, 115));
@@ -420,13 +421,13 @@ public class UserFrame extends javax.swing.JFrame {
                         .addGap(29, 29, 29))
                     .addGroup(InfoCalendarPanelLayout.createSequentialGroup()
                         .addGroup(InfoCalendarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(DevelopmentsScrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 408, Short.MAX_VALUE)
+                            .addComponent(DevelopmentsScrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
                             .addComponent(DevelopmentsLabel))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(InfoCalendarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(InfoCalendarPanelLayout.createSequentialGroup()
                                 .addComponent(EvidenceLabel)
-                                .addGap(0, 177, Short.MAX_VALUE))
+                                .addGap(0, 149, Short.MAX_VALUE))
                             .addComponent(EvidenceScrollPane))
                         .addContainerGap())))
         );
@@ -459,7 +460,7 @@ public class UserFrame extends javax.swing.JFrame {
                         .addComponent(TasksPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(InfoCalendarPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(NombreFiltrosPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(NombreFiltrosPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 968, Short.MAX_VALUE)))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -471,7 +472,8 @@ public class UserFrame extends javax.swing.JFrame {
             .addComponent(OptionsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
-        pack();
+        setSize(new java.awt.Dimension(1242, 756));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void CollaboratorsIconMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_CollaboratorsIconMouseEntered
@@ -524,14 +526,6 @@ public class UserFrame extends javax.swing.JFrame {
         ByCollaboratorIcon.setIcon(new ImageIcon("assets/bycollaborator.png"));
     }//GEN-LAST:event_ByCollaboratorIconMouseExited
 
-    private void SincronizeIconMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SincronizeIconMouseEntered
-        SincronizeIcon.setForeground(java.awt.Color.decode("#FF6600"));
-    }//GEN-LAST:event_SincronizeIconMouseEntered
-
-    private void SincronizeIconMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SincronizeIconMouseExited
-        SincronizeIcon.setForeground(java.awt.Color.WHITE);
-    }//GEN-LAST:event_SincronizeIconMouseExited
-
     private void ProjectsIconMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProjectsIconMouseExited
         ProjectsIcon.setForeground(java.awt.Color.WHITE);
     }//GEN-LAST:event_ProjectsIconMouseExited
@@ -540,44 +534,24 @@ public class UserFrame extends javax.swing.JFrame {
         ProjectsIcon.setForeground(java.awt.Color.decode("#FF6600"));
     }//GEN-LAST:event_ProjectsIconMouseEntered
 
+    private void SincronizeIconMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SincronizeIconMouseEntered
+        SincronizeIcon.setForeground(java.awt.Color.decode("#FF6600"));
+    }//GEN-LAST:event_SincronizeIconMouseEntered
+
+    private void SincronizeIconMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SincronizeIconMouseExited
+        SincronizeIcon.setForeground(java.awt.Color.WHITE);
+    }//GEN-LAST:event_SincronizeIconMouseExited
+
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(UserFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(UserFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(UserFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(UserFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new UserFrame(parent).setVisible(true);
-            }
-        });
-    }
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JList<String> ActiveList;
     private javax.swing.JScrollPane ActiveScrollPane;
     private javax.swing.JLabel AsignadoLabel;
+    private javax.swing.JList<String> BannedList;
     private javax.swing.JScrollPane BannedScrollPane;
     private javax.swing.JLabel ByActivityIcon;
     private javax.swing.JSeparator ByActivitySeparator;
@@ -585,6 +559,7 @@ public class UserFrame extends javax.swing.JFrame {
     private javax.swing.JSeparator ByCollaboratorSeparator;
     private javax.swing.JLabel ByDateIcon;
     private javax.swing.JSeparator ByDateSeparator;
+    private javax.swing.JComboBox<String> CollaboratorComboBox;
     private javax.swing.JLabel CollaboratorsIcon;
     private javax.swing.JTabbedPane CollaboratorsTabbedPane;
     private javax.swing.JLabel DevelopmentsLabel;
@@ -603,18 +578,15 @@ public class UserFrame extends javax.swing.JFrame {
     private javax.swing.JLabel ProjectsIcon;
     private javax.swing.JLabel ReportIcon;
     private javax.swing.JLabel SincronizeIcon;
+    private javax.swing.JComboBox<String> TaskComboBox;
     private javax.swing.JPanel TasksPanel;
     private javax.swing.JTree TasksTree;
     private com.toedter.calendar.JDateChooser ToDateChooser;
     private javax.swing.JLabel ToLabel;
     private javax.swing.JScrollPane TreeTaskScrollPane;
     private com.toedter.calendar.JCalendar calendar;
-    private javax.swing.JComboBox<String> jComboBox1;
-    private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JList<String> jList1;
     private javax.swing.JList<String> jList2;
-    private javax.swing.JList<String> jList3;
-    private javax.swing.JList<String> jList4;
     private javax.swing.JSeparator jSeparator1;
     // End of variables declaration//GEN-END:variables
 }

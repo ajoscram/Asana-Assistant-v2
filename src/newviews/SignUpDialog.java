@@ -46,7 +46,6 @@ public class SignUpDialog extends javax.swing.JDialog {
         jSeparator1 = new javax.swing.JSeparator();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(450, 385));
         setResizable(false);
 
         SignUpPanel.setBackground(new java.awt.Color(29, 38, 52));
@@ -88,8 +87,8 @@ public class SignUpDialog extends javax.swing.JDialog {
         SignUpLabel.setForeground(new java.awt.Color(255, 255, 255));
         SignUpLabel.setText("Sign Up Form");
 
-        LoginButton.setBackground(new java.awt.Color(0, 153, 255));
-        LoginButton.setFont(new java.awt.Font("Proxima Nova Lt", 0, 16)); // NOI18N
+        LoginButton.setBackground(new java.awt.Color(255, 102, 0));
+        LoginButton.setFont(new java.awt.Font("Proxima Nova Rg", 0, 16)); // NOI18N
         LoginButton.setForeground(new java.awt.Color(255, 255, 255));
         LoginButton.setText("Sign Up");
         LoginButton.setBorder(null);

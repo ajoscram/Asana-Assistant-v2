@@ -65,8 +65,8 @@ public class LoginFrame extends javax.swing.JFrame {
         PasswordTextField.setFont(new java.awt.Font("Proxima Nova Rg", 0, 16)); // NOI18N
         PasswordTextField.setText("password");
 
-        LoginButton.setBackground(new java.awt.Color(0, 153, 255));
-        LoginButton.setFont(new java.awt.Font("Proxima Nova Lt", 0, 16)); // NOI18N
+        LoginButton.setBackground(new java.awt.Color(255, 102, 0));
+        LoginButton.setFont(new java.awt.Font("Proxima Nova Rg", 0, 16)); // NOI18N
         LoginButton.setForeground(new java.awt.Color(255, 255, 255));
         LoginButton.setBorder(null);
         LoginButton.setBorderPainted(false);
@@ -158,7 +158,8 @@ public class LoginFrame extends javax.swing.JFrame {
             .addComponent(LoginPanelBackground, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
-        pack();
+        setSize(new java.awt.Dimension(1298, 732));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void SignUpButtonMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SignUpButtonMouseEntered
@@ -170,6 +171,7 @@ public class LoginFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_SignUpButtonMouseExited
 
     private void LoginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginButtonActionPerformed
+        this.setVisible(false);
         new UserFrame(this).setVisible(true);
     }//GEN-LAST:event_LoginButtonActionPerformed
 
