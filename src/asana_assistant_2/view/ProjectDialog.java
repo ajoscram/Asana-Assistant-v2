@@ -5,18 +5,66 @@
  */
 package asana_assistant_2.view;
 
+import asana_assistant_1.control.ControlException;
+import asana_assistant_1.control.IRouter;
+import asana_assistant_1.control.dtos.DisplayString;
+import asana_assistant_1.model.User;
+import asana_assistant_1.view.View;
+import java.util.List;
+import javax.swing.DefaultListModel;
+
 /**
  *
  * @author Gabriel
  */
 public class ProjectDialog extends javax.swing.JDialog {
 
-    /**
-     * Creates new form ProjectDialog
-     */
-    public ProjectDialog(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    private UserFrame parent;
+    private IRouter router;
+    private View source;
+    private User user;
+    
+    private final DefaultListModel managedListModel;
+    private final DefaultListModel collaborateListModel;
+    
+    public ProjectDialog(View source, UserFrame parent,User user) {
+        super(parent, true);
         initComponents();
+        this.setLocationRelativeTo(parent);
+        this.setIconImage(parent.getIconImage());
+        this.parent = parent;
+        this.source = source;
+        this.router = source.getRouter();
+        this.user = user;
+        this.managedListModel = new DefaultListModel();
+        this.collaborateListModel = new DefaultListModel();
+        this.setTitle(user.getName() + " - " + user.getEmail());
+        this.ManagedList.setModel(managedListModel);
+        this.CollaborateList.setModel(collaborateListModel);
+        reloadManagedList();
+        reloadCollaborateList();
+    }
+    
+    public void reloadManagedList(){
+        try{
+            List<DisplayString> strings = router.getAdminProjectStrings(user.getId());
+            managedListModel.clear();
+            for(DisplayString string : strings)
+                managedListModel.addElement(string);
+        } catch(ControlException ex) {
+            NewView.displayError(this, ex);
+        }
+    }
+    
+    public void reloadCollaborateList(){
+        try{
+            List<DisplayString> strings = router.getCollabProjectStrings(user.getId());
+            collaborateListModel.clear();
+            for(DisplayString string : strings)
+                collaborateListModel.addElement(string);
+        } catch(ControlException ex) {
+            NewView.displayError(this, ex);
+        }
     }
 
     /**
@@ -34,9 +82,10 @@ public class ProjectDialog extends javax.swing.JDialog {
         jSeparator1 = new javax.swing.JSeparator();
         ProjectsTabbedPane = new javax.swing.JTabbedPane();
         ManageScrollPane = new javax.swing.JScrollPane();
-        ManageList = new javax.swing.JList<>();
+        ManagedList = new javax.swing.JList<>();
         CollaborateScrollPane = new javax.swing.JScrollPane();
         CollaborateList = new javax.swing.JList<>();
+        AddProjectButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -70,14 +119,14 @@ public class ProjectDialog extends javax.swing.JDialog {
 
         ManageScrollPane.setBorder(null);
 
-        ManageList.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
-        ManageList.setForeground(new java.awt.Color(85, 96, 115));
-        ManageList.setModel(new javax.swing.AbstractListModel<String>() {
+        ManagedList.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
+        ManagedList.setForeground(new java.awt.Color(85, 96, 115));
+        ManagedList.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
-        ManageScrollPane.setViewportView(ManageList);
+        ManageScrollPane.setViewportView(ManagedList);
 
         ProjectsTabbedPane.addTab("Manage", ManageScrollPane);
 
@@ -94,6 +143,21 @@ public class ProjectDialog extends javax.swing.JDialog {
 
         ProjectsTabbedPane.addTab("Collaborate", CollaborateScrollPane);
 
+        AddProjectButton.setBackground(new java.awt.Color(255, 102, 0));
+        AddProjectButton.setFont(new java.awt.Font("Proxima Nova Rg", 0, 16)); // NOI18N
+        AddProjectButton.setForeground(new java.awt.Color(255, 255, 255));
+        AddProjectButton.setText("Add Project");
+        AddProjectButton.setBorder(null);
+        AddProjectButton.setBorderPainted(false);
+        AddProjectButton.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        AddProjectButton.setDebugGraphicsOptions(javax.swing.DebugGraphics.NONE_OPTION);
+        AddProjectButton.setFocusPainted(false);
+        AddProjectButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                AddProjectButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -103,7 +167,9 @@ public class ProjectDialog extends javax.swing.JDialog {
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap(31, Short.MAX_VALUE)
-                .addComponent(ProjectsTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 334, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(ProjectsTabbedPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 334, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(AddProjectButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(15, 15, 15))
         );
         jPanel2Layout.setVerticalGroup(
@@ -112,7 +178,9 @@ public class ProjectDialog extends javax.swing.JDialog {
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(ProjectsTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 435, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(80, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(AddProjectButton, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(24, Short.MAX_VALUE))
         );
 
         ProjectsTabbedPane.getAccessibleContext().setAccessibleName("Manage");
@@ -135,14 +203,19 @@ public class ProjectDialog extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void AddProjectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddProjectButtonActionPerformed
+        new AddProjectDialog(source,this,user).setVisible(true);
+    }//GEN-LAST:event_AddProjectButtonActionPerformed
+
    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton AddProjectButton;
     private javax.swing.JPanel BackgroundPanel;
     private javax.swing.JList<String> CollaborateList;
     private javax.swing.JScrollPane CollaborateScrollPane;
-    private javax.swing.JList<String> ManageList;
     private javax.swing.JScrollPane ManageScrollPane;
+    private javax.swing.JList<String> ManagedList;
     private javax.swing.JLabel ProjectsLabel;
     private javax.swing.JTabbedPane ProjectsTabbedPane;
     private javax.swing.JPanel jPanel2;

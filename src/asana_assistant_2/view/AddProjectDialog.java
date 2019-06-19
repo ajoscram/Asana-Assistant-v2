@@ -5,18 +5,29 @@
  */
 package asana_assistant_2.view;
 
+import asana_assistant_1.control.ControlException;
+import asana_assistant_1.control.IRouter;
+import asana_assistant_1.control.dtos.ProjectDTO;
+import asana_assistant_1.model.User;
+import asana_assistant_1.view.View;
+
 /**
  *
  * @author Gabriel
  */
 public class AddProjectDialog extends javax.swing.JDialog {
 
-    /**
-     * Creates new form AddProjectDialog
-     */
-    public AddProjectDialog(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    private User user;
+    private IRouter router;
+    private ProjectDialog parent;
+    
+    public AddProjectDialog(View source, ProjectDialog parent, User user) {
+        super(parent, true);
         initComponents();
+        this.setLocationRelativeTo(parent);
+        this.parent = parent;
+        this.user = user;
+        this.router = source.getRouter();
     }
 
     /**
@@ -144,7 +155,15 @@ public class AddProjectDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void AddButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddButtonActionPerformed
-        this.setVisible(false);
+        try {
+            ProjectDTO project = new ProjectDTO(ProjectNameTextField.getText(), user.getId());
+            router.addProject(project);
+            parent.reloadManagedList();
+            NewView.displayInfo(this, "Project added!");
+            this.dispose();
+        } catch (ControlException ex) {
+            NewView.displayError(this, ex);
+        }
     }//GEN-LAST:event_AddButtonActionPerformed
 
     private void ProjectNameTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ProjectNameTextFieldActionPerformed

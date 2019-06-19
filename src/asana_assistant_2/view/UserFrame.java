@@ -112,6 +112,9 @@ public class UserFrame extends javax.swing.JFrame {
         ProjectsIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/projects.png"))); // NOI18N
         ProjectsIcon.setText("Projects");
         ProjectsIcon.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                ProjectsIconMouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 ProjectsIconMouseEntered(evt);
             }
@@ -549,6 +552,11 @@ public class UserFrame extends javax.swing.JFrame {
     private void SincronizeIconMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SincronizeIconMouseExited
         SincronizeIcon.setForeground(java.awt.Color.WHITE);
     }//GEN-LAST:event_SincronizeIconMouseExited
+
+    private void ProjectsIconMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProjectsIconMouseClicked
+        new ProjectDialog(source,this,user).setVisible(true);
+    }//GEN-LAST:event_ProjectsIconMouseClicked
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList<String> ActiveList;
     private javax.swing.JScrollPane ActiveScrollPane;
