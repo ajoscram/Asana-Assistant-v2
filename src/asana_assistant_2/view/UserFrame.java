@@ -46,6 +46,9 @@ public class UserFrame extends javax.swing.JFrame {
         closeProject();
     }
     
+    public void openProject(long id){
+    }
+    
     private void closeProject(){
         project = null;
         this.ProjectsIcon.setText("Open");
@@ -120,7 +123,7 @@ public class UserFrame extends javax.swing.JFrame {
                 CollaboratorsIconMouseExited(evt);
             }
         });
-
+		
         LogoLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/logouserframe.png"))); // NOI18N
 
         CollaboratorsTabbedPane.setBackground(new java.awt.Color(255, 255, 255));
@@ -556,6 +559,10 @@ public class UserFrame extends javax.swing.JFrame {
     private void SincronizeIconMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SincronizeIconMouseExited
         SincronizeIcon.setForeground(java.awt.Color.WHITE);
     }//GEN-LAST:event_SincronizeIconMouseExited
+
+    private void ProjectsIconMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProjectsIconMouseClicked
+        new ProjectDialog(source,this,user).setVisible(true);
+    }//GEN-LAST:event_ProjectsIconMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList<String> ActiveList;
