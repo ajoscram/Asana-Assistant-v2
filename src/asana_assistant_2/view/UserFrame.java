@@ -123,7 +123,7 @@ public class UserFrame extends javax.swing.JFrame {
                 CollaboratorsIconMouseExited(evt);
             }
         });
-		
+
         LogoLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/logouserframe.png"))); // NOI18N
 
         CollaboratorsTabbedPane.setBackground(new java.awt.Color(255, 255, 255));
