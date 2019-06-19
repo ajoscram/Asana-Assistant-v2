@@ -37,19 +37,19 @@ public class Main {
             ex.printStackTrace();
             }*/
             
-            /*CSVTaskParser TEST
+            /*CSVTaskParser TEST*/
             CSVTaskParser parser = new CSVTaskParser();
             for(TaskDTO task : parser.parse("tasks.csv"))
-            printTask(task, 0);*/
+                printTask(task, 0);
             
-            /*PrettyPDFReportPrinter TEST*/
+            /*ProjectPDFReportPrinter TEST
             Connection.connect();
             Router router = new Router();
             Project project = router.getProject(1);
-            ProjectReportBuilder builder = new ProjectReportBuilder().setAsignee(1l).setStart(LocalDate.now()).setEnd(LocalDate.now());
+            ProjectReportBuilder builder = new ProjectReportBuilder();//.setAsignee(1l).setStart(LocalDate.now()).setEnd(LocalDate.now());
             Report report = builder.build(project);
             new ProjectPDFReportPrinter().print(report, "C:\\Users\\Alejandro\\Downloads\\report.pdf");
-            Desktop.getDesktop().open(new File("C:\\Users\\Alejandro\\Downloads\\report.pdf"));
+            Desktop.getDesktop().open(new File("C:\\Users\\Alejandro\\Downloads\\report.pdf"));*/
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -62,6 +62,8 @@ public class Main {
             level--;
         }
         string += task.getName();
+        if(task.getAsignee() != null)
+            string += " email: " + task.getAsignee().getEmail() + "  name: " + task.getAsignee().getName();
         System.out.println(string);
         for(TaskDTO subtask : task.getSubtasks())
             printTask(subtask, level+1);

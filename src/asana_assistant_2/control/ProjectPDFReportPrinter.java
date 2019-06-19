@@ -1,5 +1,6 @@
 package asana_assistant_2.control;
 
+import asana_assistant_1.model.Task;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
@@ -13,6 +14,7 @@ import asana_assistant_1.report.Section;
 import asana_assistant_1.report.printers.PDFReportPrinter;
 import asana_assistant_1.report.sections.ListSection;
 import asana_assistant_1.report.sections.TextSection;
+import com.itextpdf.text.ListItem;
 
 public class ProjectPDFReportPrinter extends PDFReportPrinter {
     
@@ -44,7 +46,22 @@ public class ProjectPDFReportPrinter extends PDFReportPrinter {
     
     @Override
     protected List getList(ListSection listSection) throws ReportException {
-        List list = super.getList(listSection);
+        List list;
+        if(listSection.getName().equals(TASKS)){
+            list = new List(List.UNORDERED, 12);
+            list.setListSymbol("");
+            list.setIndentationLeft(-12);
+        }
+        else{
+            list = new List(List.UNORDERED, 12);
+            list.setListSymbol("");
+        }
+        for(Element element : parse(listSection.getSections())){
+            if(element instanceof Paragraph)
+                list.add(new ListItem((Paragraph)element));
+            else if(element instanceof List)
+                list.add((List)element);
+        }
         return list;
     }
 
@@ -62,6 +79,20 @@ public class ProjectPDFReportPrinter extends PDFReportPrinter {
             return new Chunk("Starting: ", REPORT_PARAMETER_FONT);
         else if(section.getName().equals(REPORT_FINISH))
             return new Chunk("Ending: ", REPORT_PARAMETER_FONT);
+        else if(section.getName().equals(TASK_TYPE))
+            return new Chunk("Type: ", REPORT_PARAMETER_FONT);
+        else if(section.getName().equals(TASK_PARENT))
+            return new Chunk("Parent Task: ", REPORT_PARAMETER_FONT);
+        else if(section.getName().equals(TASK_ASIGNEE))
+            return new Chunk("Asignee: ", REPORT_PARAMETER_FONT);
+        else if(section.getName().equals(TASK_DUE))
+            return new Chunk("Due: ", REPORT_PARAMETER_FONT);
+        else if(section.getName().equals(TASK_COMPLETED))
+            return new Chunk("Completed: ", REPORT_PARAMETER_FONT);
+        else if(section.getName().equals(DEVELOPMENT_WORK))
+            return new Chunk("Work: ", REPORT_PARAMETER_FONT);
+        else if(section.getName().equals(DEVELOPMENT_DESCRIPTION))
+            return new Chunk("Description: ", REPORT_PARAMETER_FONT);
         else
             return super.getChunk(section);
     }
@@ -72,6 +103,8 @@ public class ProjectPDFReportPrinter extends PDFReportPrinter {
             paragraph.add(Chunk.NEWLINE);
             paragraph.add(new Chunk("Tasks:", REPORT_PARAMETER_FONT));
         }
+        else if(section.getName().equals(DEVELOPMENT_EVIDENCE_TITLE))
+            paragraph.add(new Chunk("Evidence:", REPORT_PARAMETER_FONT));
         else
             paragraph.add(new Chunk(section.getName(), REGULAR_FONT));
         return paragraph;
@@ -89,27 +122,35 @@ public class ProjectPDFReportPrinter extends PDFReportPrinter {
             else if(section instanceof TextSection){
                 Paragraph text = new Paragraph();
                 text.add(getChunk((TextSection) section));
-                if(section.getName() == PROJECT_NAME)
-                {
-                    //adding date before title
-                    Paragraph date = new Paragraph();
-                    date.add(new Chunk(LocalDate.now().toString(), REPORT_DATE_FONT));
-                    date.setAlignment(Paragraph.ALIGN_RIGHT);
-                    elements.add(date);
-                    
-                    //adding the line separator after the title
-                    LineSeparator separator = new LineSeparator();
-                    separator.setOffset((float)4.5);
-                    text.add(Chunk.NEWLINE);
-                    text.add(separator);
-                    text.add(Chunk.NEWLINE);
-                }
-                if(section.getName() == PROJECT_ID ||
-                   section.getName() == REPORT_BY || 
-                   section.getName() == REPORT_START || 
-                   section.getName() == REPORT_FINISH){
-                    TextSection textSection = (TextSection)section;
-                    text.add(new Chunk(textSection.getText(), REGULAR_FONT));
+                if(section.getName() != null){
+                    if(section.getName().equals(PROJECT_NAME))
+                    {
+                        //adding date before title
+                        Paragraph date = new Paragraph();
+                        date.add(new Chunk(LocalDate.now().toString(), REPORT_DATE_FONT));
+                        date.setAlignment(Paragraph.ALIGN_RIGHT);
+                        elements.add(date);
+
+                        //adding the line separator after the title
+                        LineSeparator separator = new LineSeparator();
+                        separator.setOffset((float)4.5);
+                        text.add(Chunk.NEWLINE);
+                        text.add(separator);
+                        text.add(Chunk.NEWLINE);
+                    }else if(section.getName().equals(PROJECT_ID) ||
+                       section.getName().equals(REPORT_BY) || 
+                       section.getName().equals(REPORT_START) || 
+                       section.getName().equals(REPORT_FINISH)||
+                       section.getName().equals(TASK_TYPE) ||
+                       section.getName().equals(TASK_PARENT) ||
+                       section.getName().equals(TASK_ASIGNEE) ||
+                       section.getName().equals(TASK_DUE) ||
+                       section.getName().equals(TASK_COMPLETED) || 
+                       section.getName().equals(DEVELOPMENT_WORK)){
+                        TextSection textSection = (TextSection)section;
+                        text.add(new Chunk(textSection.getText(), REGULAR_FONT));
+                    }else if(section.getName().equals(DEVELOPMENT_DESCRIPTION))
+                        text.add(new Chunk("\"" + ((TextSection)section).getText() + "\"", REGULAR_FONT));
                 }
                 elements.add(text);
             }
