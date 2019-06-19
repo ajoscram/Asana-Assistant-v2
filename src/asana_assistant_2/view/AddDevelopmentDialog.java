@@ -79,7 +79,7 @@ class AddDevelopmentDialog extends javax.swing.JDialog {
                 DevelopmentDTO development = new DevelopmentDTO(date, hours, description, evidence);
                 router.addDevelopment(task.getId(), development);
                 NewView.displayInfo(this, "Development added successfully.");
-                //parent.resetDevelopmentFilters();
+                parent.reloadDevelopments(task);
                 this.dispose();
             }
         } catch(ControlException ex) {

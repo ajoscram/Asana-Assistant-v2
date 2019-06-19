@@ -16,7 +16,9 @@ import asana_assistant_1.view.DefaultView;
 import asana_assistant_1.view.TaskTreeCellRenderer;
 import asana_assistant_1.view.View;
 import asana_assistant_2.control.CSVTaskParser;
+import asana_assistant_2.control.ProjectPDFReportPrinter;
 import java.awt.Frame;
+import java.awt.event.ItemEvent;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -33,6 +35,7 @@ public class UserFrame extends javax.swing.JFrame {
     private static final String JSON_DESCRIPTION = "JSON (.json)";
     private static final String CSV_DESCRIPTION = "CSV (.csv)";
     private static final String PDF_DESCRIPTION = "PDF (.pdf)";
+    private static final long DATE_MIN = -62135734039898l;
     
     private LoginFrame parent;
     private IRouter router;
@@ -110,7 +113,7 @@ public class UserFrame extends javax.swing.JFrame {
             resetFilters();
             
             //poulating tasks tree
-            reloadTasks(project, TaskFilter.EMPTY);
+            reloadTasks(project);
             
             //enabling everything
             this.ProjectsIcon.setText("Close");
@@ -147,6 +150,7 @@ public class UserFrame extends javax.swing.JFrame {
                 CollaboratorComboBox.addItem(collaborator);
             for(DisplayString collaborator : bannedCollaborators)
                 CollaboratorComboBox.addItem(collaborator);
+            resetFilters();
         } catch(ControlException ex){
             DefaultView.displayError(this, ex);
         }
@@ -176,9 +180,10 @@ public class UserFrame extends javax.swing.JFrame {
         return node;
     }
     
-    private void reloadTasks(Project project, TaskFilter filter){
+    private void reloadTasks(Project project){
         try{
             if(project != null){
+                TaskFilter filter = getTaskFilter();
                 DefaultMutableTreeNode root = (DefaultMutableTreeNode)tasksTreeModel.getRoot();
                 root.removeAllChildren();
                 List<DisplayString> tasks = router.getTaskStrings(project.getId(), filter);
@@ -280,7 +285,7 @@ public class UserFrame extends javax.swing.JFrame {
                     else if(chooser.getFileFilter().getDescription().equals(CSV_DESCRIPTION))
                         router.synchronize(project.getId(), file, new CSVTaskParser());
                     reloadFilters(project);
-                    reloadTasks(project, TaskFilter.EMPTY);
+                    reloadTasks(project);
                     reloadCollaboratorLists(project);
                     DefaultView.displayInfo(this, "Tasks synchronized successfullly.");
                 } catch(ControlException ex){
@@ -307,10 +312,13 @@ public class UserFrame extends javax.swing.JFrame {
     private TaskFilter getTaskFilter(){
         Long userId = null;
         Long taskId = null;
-        Object task = TaskComboBox.getSelectedItem();
-        if(task instanceof DisplayString)
-            taskId = ((DisplayString)task).getId();
-        return null;
+        DisplayString user = (DisplayString)CollaboratorComboBox.getSelectedItem();
+        DisplayString task = (DisplayString)TaskComboBox.getSelectedItem();
+        if(task != null)
+            taskId = task.getId();
+        if(user != null)
+            userId = user.getId();
+        return new TaskFilter(taskId, userId);
     }
     
     private void printReport(){
@@ -327,12 +335,92 @@ public class UserFrame extends javax.swing.JFrame {
                 TaskFilter taskFilter = getTaskFilter();
                 if(chooser.getFileFilter().getDescription().equals(PDF_DESCRIPTION)){
                    String filepath = path + "\\" + LocalDate.now() + " Report.pdf";
-                   router.printReport(project.getId(), filepath, new PDFReportPrinter(), taskFilter, developmentFilter);
+                   router.printReport(project.getId(), filepath, new ProjectPDFReportPrinter(), taskFilter, developmentFilter);
                 }
             } catch(ControlException ex){
                 View.displayError(this, ex);
             } catch(ReportException ex){
                 View.displayError(this, ex);
+            }
+        }
+    }
+    
+    public void displayEvidence(javax.swing.event.ListSelectionEvent evt){
+        if(!evt.getValueIsAdjusting()){
+            evidenceListModel.removeAllElements();
+            DisplayString development = (DisplayString)DevelopmentsList.getSelectedValue();
+            if(development != null){
+                try {
+                    for(DisplayString evidence : router.getEvidenceStrings(development.getId()))
+                        evidenceListModel.addElement(evidence);
+                } catch (ControlException ex) {
+                    DefaultView.displayError(this, ex);
+                }
+            }
+        }
+    }
+    
+    private void filterDevelopments(java.beans.PropertyChangeEvent evt){
+        if(evt.getPropertyName().equals("date") && task != null){
+            Date start = FromDateChooser.getDate();
+            Date end = ToDateChooser.getDate();
+            Date current = calendar.getDate();
+            calendar.setSelectableDateRange(new Date(DATE_MIN), new Date(Long.MAX_VALUE));
+            if(start == null && end == null)
+                calendar.setDate(current);
+            else if(start == null && end != null){
+                calendar.setMaxSelectableDate(end);
+                if(current.after(end))
+                    calendar.setDate(end);
+                else
+                    calendar.setDate(current);
+            }
+            else if(start != null && end == null){
+                calendar.setMinSelectableDate(start);
+                if(current.before(start))
+                    calendar.setDate(start);
+                else
+                    calendar.setDate(start);
+            }
+            else if(start.before(end) || start.compareTo(end) == 0){
+                calendar.setSelectableDateRange(start, end);
+                if(current.before(start))
+                    calendar.setDate(start);
+                else if(current.after(end))
+                    calendar.setDate(end);
+                else
+                    calendar.setDate(start);
+            }
+            else{
+                FromDateChooser.setDate(null);
+                ToDateChooser.setDate(null);
+                DefaultView.displayError(this, "The dates picked must be in chronological order.");
+            }
+            reloadDevelopments(task);
+        }
+    }
+    
+    public void filterTasks(java.awt.event.ItemEvent evt){
+        if(evt.getStateChange() == ItemEvent.SELECTED && project != null){
+            reloadTasks(project);
+        }
+    }
+    
+    private void downloadEvidence(){
+        DisplayString evidence = (DisplayString)EvidenceList.getSelectedValue();
+        if(evidence == null)
+            View.displayError(this, "You must select an evidence to download from the evidence list.");
+        else{
+            JFileChooser chooser  = new JFileChooser();
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
+            {
+                try{
+                    String directory = chooser.getSelectedFile().getAbsolutePath();
+                    router.downloadEvidence(evidence.getId(), directory);
+                } catch(ControlException ex){
+                    DefaultView.displayError(this, ex);
+                }
             }
         }
     }
@@ -347,6 +435,10 @@ public class UserFrame extends javax.swing.JFrame {
         unbanCollaboratorMenuItem = new javax.swing.JMenuItem();
         developmentsPopupMenu = new javax.swing.JPopupMenu();
         addDevelopmentMenuItem = new javax.swing.JMenuItem();
+        filtersPopupMenu = new javax.swing.JPopupMenu();
+        resetFiltersMenuItem = new javax.swing.JMenuItem();
+        evidencePopupMenu = new javax.swing.JPopupMenu();
+        downloadEvidenceMenuItem = new javax.swing.JMenuItem();
         OptionsPanel = new javax.swing.JPanel();
         CollaboratorsIcon = new javax.swing.JLabel();
         LogoLabel = new javax.swing.JLabel();
@@ -411,6 +503,22 @@ public class UserFrame extends javax.swing.JFrame {
             }
         });
         developmentsPopupMenu.add(addDevelopmentMenuItem);
+
+        resetFiltersMenuItem.setText("Reset Filters");
+        resetFiltersMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resetFiltersMenuItemActionPerformed(evt);
+            }
+        });
+        filtersPopupMenu.add(resetFiltersMenuItem);
+
+        downloadEvidenceMenuItem.setText("Download Selected Evidence");
+        downloadEvidenceMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                downloadEvidenceMenuItemActionPerformed(evt);
+            }
+        });
+        evidencePopupMenu.add(downloadEvidenceMenuItem);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(1280, 720));
@@ -495,6 +603,9 @@ public class UserFrame extends javax.swing.JFrame {
         ReportIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/report_userframe.png"))); // NOI18N
         ReportIcon.setText("Report");
         ReportIcon.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                ReportIconMouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 ReportIconMouseEntered(evt);
             }
@@ -542,6 +653,7 @@ public class UserFrame extends javax.swing.JFrame {
         );
 
         NombreFiltrosPanel.setBackground(new java.awt.Color(255, 255, 255));
+        NombreFiltrosPanel.setComponentPopupMenu(filtersPopupMenu);
         NombreFiltrosPanel.setPreferredSize(new java.awt.Dimension(1024, 108));
 
         NombreProyectoLabel.setFont(new java.awt.Font("Proxima Nova Rg", 1, 36)); // NOI18N
@@ -573,6 +685,20 @@ public class UserFrame extends javax.swing.JFrame {
         ToLabel.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
         ToLabel.setText("  To:");
 
+        ToDateChooser.setInheritsPopupMenu(true);
+        ToDateChooser.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                ToDateChooserPropertyChange(evt);
+            }
+        });
+
+        FromDateChooser.setInheritsPopupMenu(true);
+        FromDateChooser.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                FromDateChooserPropertyChange(evt);
+            }
+        });
+
         FromLabel.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
         FromLabel.setText("  From:");
 
@@ -595,6 +721,21 @@ public class UserFrame extends javax.swing.JFrame {
         ByActivitySeparator.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
         ByDateSeparator.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        ByDateSeparator.setInheritsPopupMenu(true);
+
+        TaskComboBox.setInheritsPopupMenu(true);
+        TaskComboBox.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                TaskComboBoxItemStateChanged(evt);
+            }
+        });
+
+        CollaboratorComboBox.setInheritsPopupMenu(true);
+        CollaboratorComboBox.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                CollaboratorComboBoxItemStateChanged(evt);
+            }
+        });
 
         javax.swing.GroupLayout NombreFiltrosPanelLayout = new javax.swing.GroupLayout(NombreFiltrosPanel);
         NombreFiltrosPanel.setLayout(NombreFiltrosPanelLayout);
@@ -696,11 +837,17 @@ public class UserFrame extends javax.swing.JFrame {
         DevelopmentsList.setComponentPopupMenu(developmentsPopupMenu);
         DevelopmentsList.setSelectionBackground(new java.awt.Color(255, 102, 0));
         DevelopmentsList.setSelectionForeground(new java.awt.Color(243, 242, 242));
+        DevelopmentsList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                DevelopmentsListValueChanged(evt);
+            }
+        });
         DevelopmentsScrollpane.setViewportView(DevelopmentsList);
 
         EvidenceList.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
         EvidenceList.setForeground(new java.awt.Color(85, 96, 115));
         EvidenceList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        EvidenceList.setComponentPopupMenu(evidencePopupMenu);
         EvidenceList.setSelectionBackground(new java.awt.Color(255, 102, 0));
         EvidenceList.setSelectionForeground(new java.awt.Color(243, 242, 242));
         EvidenceScrollPane.setViewportView(EvidenceList);
@@ -872,6 +1019,38 @@ public class UserFrame extends javax.swing.JFrame {
         new AddDevelopmentDialog(source, this, task, calendar.getDate()).setVisible(true);
     }//GEN-LAST:event_addDevelopmentMenuItemActionPerformed
 
+    private void DevelopmentsListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_DevelopmentsListValueChanged
+        displayEvidence(evt);
+    }//GEN-LAST:event_DevelopmentsListValueChanged
+
+    private void FromDateChooserPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_FromDateChooserPropertyChange
+        filterDevelopments(evt);
+    }//GEN-LAST:event_FromDateChooserPropertyChange
+
+    private void ToDateChooserPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_ToDateChooserPropertyChange
+        filterDevelopments(evt);
+    }//GEN-LAST:event_ToDateChooserPropertyChange
+
+    private void TaskComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_TaskComboBoxItemStateChanged
+        filterTasks(evt);
+    }//GEN-LAST:event_TaskComboBoxItemStateChanged
+
+    private void CollaboratorComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_CollaboratorComboBoxItemStateChanged
+        filterTasks(evt);
+    }//GEN-LAST:event_CollaboratorComboBoxItemStateChanged
+
+    private void resetFiltersMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetFiltersMenuItemActionPerformed
+        resetFilters();
+    }//GEN-LAST:event_resetFiltersMenuItemActionPerformed
+
+    private void ReportIconMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ReportIconMouseClicked
+        printReport();
+    }//GEN-LAST:event_ReportIconMouseClicked
+
+    private void downloadEvidenceMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_downloadEvidenceMenuItemActionPerformed
+        downloadEvidence();
+    }//GEN-LAST:event_downloadEvidenceMenuItemActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList ActiveList;
     private javax.swing.JScrollPane ActiveScrollPane;
@@ -917,7 +1096,11 @@ public class UserFrame extends javax.swing.JFrame {
     private javax.swing.JPopupMenu bannedCollaboratorsPopupMenu;
     private com.toedter.calendar.JCalendar calendar;
     private javax.swing.JPopupMenu developmentsPopupMenu;
+    private javax.swing.JMenuItem downloadEvidenceMenuItem;
+    private javax.swing.JPopupMenu evidencePopupMenu;
+    private javax.swing.JPopupMenu filtersPopupMenu;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JMenuItem resetFiltersMenuItem;
     private javax.swing.JMenuItem unbanCollaboratorMenuItem;
     // End of variables declaration//GEN-END:variables
 }
