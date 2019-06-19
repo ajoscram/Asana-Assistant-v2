@@ -41,6 +41,7 @@ public class ReportDialog extends javax.swing.JDialog {
         jLabel5 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setResizable(false);
 
         jFileChooser1.setApproveButtonText("Imprimir");
         jFileChooser1.setFont(new java.awt.Font("Proxima Nova Rg", 0, 13)); // NOI18N

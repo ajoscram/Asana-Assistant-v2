@@ -48,6 +48,7 @@ public class AddProjectDialog extends javax.swing.JDialog {
         ProjectNameLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setResizable(false);
 
         BackgroundPanel.setBackground(new java.awt.Color(255, 102, 0));
 

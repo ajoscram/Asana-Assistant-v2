@@ -48,6 +48,7 @@ public class AddDevelopmentDialog extends javax.swing.JDialog {
         jPanel2 = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setResizable(false);
 
         jPanel1.setBackground(new java.awt.Color(85, 96, 115));
 

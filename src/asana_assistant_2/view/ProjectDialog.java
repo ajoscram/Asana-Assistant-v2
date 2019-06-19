@@ -88,6 +88,7 @@ public class ProjectDialog extends javax.swing.JDialog {
         AddProjectButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setResizable(false);
 
         BackgroundPanel.setBackground(new java.awt.Color(29, 38, 52));
 
