@@ -1,6 +1,7 @@
 package asana_assistant_2.view;
 
 import asana_assistant_1.control.IRouter;
+import asana_assistant_1.model.Project;
 import asana_assistant_1.model.User;
 import asana_assistant_1.view.TaskTreeCellRenderer;
 import asana_assistant_1.view.View;
@@ -15,6 +16,7 @@ public class UserFrame extends javax.swing.JFrame {
     private IRouter router;
     private View source;
     private User user;
+    private Project project;
     
     private final DefaultListModel activeCollaboratorsListModel;
     private final DefaultListModel bannedCollaboratorsListModel;
@@ -39,6 +41,18 @@ public class UserFrame extends javax.swing.JFrame {
         this.TasksTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         this.TasksTree.setModel(tasksTreeModel);
         this.TasksTree.setShowsRootHandles(true);
+        
+        //called to disable all unwanted interface options
+        closeProject();
+    }
+    
+    private void closeProject(){
+        project = null;
+        this.ProjectsIcon.setText("Open");
+        this.ReportIcon.setVisible(false);
+        this.SincronizeIcon.setVisible(false);
+        this.CollaboratorsIcon.setVisible(false);
+        this.CollaboratorsTabbedPane.setVisible(false);
     }
 
     @SuppressWarnings("unchecked")
@@ -47,8 +61,6 @@ public class UserFrame extends javax.swing.JFrame {
 
         OptionsPanel = new javax.swing.JPanel();
         CollaboratorsIcon = new javax.swing.JLabel();
-        ProjectsIcon = new javax.swing.JLabel();
-        ReportIcon = new javax.swing.JLabel();
         LogoLabel = new javax.swing.JLabel();
         CollaboratorsTabbedPane = new javax.swing.JTabbedPane();
         ActiveScrollPane = new javax.swing.JScrollPane();
@@ -56,6 +68,8 @@ public class UserFrame extends javax.swing.JFrame {
         BannedScrollPane = new javax.swing.JScrollPane();
         BannedList = new javax.swing.JList<>();
         SincronizeIcon = new javax.swing.JLabel();
+        ProjectsIcon = new javax.swing.JLabel();
+        ReportIcon = new javax.swing.JLabel();
         NombreFiltrosPanel = new javax.swing.JPanel();
         NombreProyectoLabel = new javax.swing.JLabel();
         ByActivityIcon = new javax.swing.JLabel();
@@ -107,10 +121,57 @@ public class UserFrame extends javax.swing.JFrame {
             }
         });
 
+        LogoLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/logouserframe.png"))); // NOI18N
+
+        CollaboratorsTabbedPane.setBackground(new java.awt.Color(255, 255, 255));
+        CollaboratorsTabbedPane.setForeground(new java.awt.Color(29, 38, 52));
+        CollaboratorsTabbedPane.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        CollaboratorsTabbedPane.setFont(new java.awt.Font("Proxima Nova Rg", 1, 14)); // NOI18N
+
+        ActiveScrollPane.setBackground(new java.awt.Color(255, 255, 255));
+        ActiveScrollPane.setBorder(null);
+        ActiveScrollPane.setForeground(new java.awt.Color(85, 96, 115));
+        ActiveScrollPane.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
+
+        ActiveList.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
+        ActiveList.setForeground(new java.awt.Color(85, 96, 115));
+        ActiveList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        ActiveList.setSelectionBackground(new java.awt.Color(255, 102, 0));
+        ActiveList.setSelectionForeground(new java.awt.Color(243, 242, 242));
+        ActiveScrollPane.setViewportView(ActiveList);
+
+        CollaboratorsTabbedPane.addTab("Active", ActiveScrollPane);
+
+        BannedScrollPane.setBorder(null);
+        BannedScrollPane.setForeground(new java.awt.Color(85, 96, 115));
+        BannedScrollPane.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
+
+        BannedList.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
+        BannedList.setForeground(new java.awt.Color(85, 96, 115));
+        BannedList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        BannedList.setSelectionBackground(new java.awt.Color(255, 102, 0));
+        BannedList.setSelectionForeground(new java.awt.Color(243, 242, 242));
+        BannedScrollPane.setViewportView(BannedList);
+
+        CollaboratorsTabbedPane.addTab("Banned", BannedScrollPane);
+
+        SincronizeIcon.setFont(new java.awt.Font("Proxima Nova Rg", 0, 24)); // NOI18N
+        SincronizeIcon.setForeground(new java.awt.Color(255, 255, 255));
+        SincronizeIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/synchronizeuserframe.png"))); // NOI18N
+        SincronizeIcon.setText("Synchronize");
+        SincronizeIcon.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                SincronizeIconMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                SincronizeIconMouseExited(evt);
+            }
+        });
+
         ProjectsIcon.setFont(new java.awt.Font("Proxima Nova Rg", 0, 24)); // NOI18N
         ProjectsIcon.setForeground(new java.awt.Color(255, 255, 255));
         ProjectsIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/projects.png"))); // NOI18N
-        ProjectsIcon.setText("Projects");
+        ProjectsIcon.setText("Close");
         ProjectsIcon.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 ProjectsIconMouseEntered(evt);
@@ -133,95 +194,41 @@ public class UserFrame extends javax.swing.JFrame {
             }
         });
 
-        LogoLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/logouserframe.png"))); // NOI18N
-
-        CollaboratorsTabbedPane.setBackground(new java.awt.Color(255, 255, 255));
-        CollaboratorsTabbedPane.setForeground(new java.awt.Color(29, 38, 52));
-        CollaboratorsTabbedPane.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        CollaboratorsTabbedPane.setFont(new java.awt.Font("Proxima Nova Rg", 1, 14)); // NOI18N
-
-        ActiveScrollPane.setBackground(new java.awt.Color(255, 255, 255));
-        ActiveScrollPane.setBorder(null);
-        ActiveScrollPane.setForeground(new java.awt.Color(85, 96, 115));
-        ActiveScrollPane.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
-
-        ActiveList.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
-        ActiveList.setForeground(new java.awt.Color(85, 96, 115));
-        ActiveList.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
-        ActiveList.setSelectionBackground(new java.awt.Color(255, 102, 0));
-        ActiveList.setSelectionForeground(new java.awt.Color(243, 242, 242));
-        ActiveScrollPane.setViewportView(ActiveList);
-
-        CollaboratorsTabbedPane.addTab("Active", ActiveScrollPane);
-
-        BannedScrollPane.setBorder(null);
-        BannedScrollPane.setForeground(new java.awt.Color(85, 96, 115));
-        BannedScrollPane.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
-
-        BannedList.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
-        BannedList.setForeground(new java.awt.Color(85, 96, 115));
-        BannedList.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
-        BannedList.setSelectionBackground(new java.awt.Color(255, 102, 0));
-        BannedList.setSelectionForeground(new java.awt.Color(243, 242, 242));
-        BannedScrollPane.setViewportView(BannedList);
-
-        CollaboratorsTabbedPane.addTab("Banned", BannedScrollPane);
-
-        SincronizeIcon.setFont(new java.awt.Font("Proxima Nova Rg", 0, 24)); // NOI18N
-        SincronizeIcon.setForeground(new java.awt.Color(255, 255, 255));
-        SincronizeIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/synchronizeuserframe.png"))); // NOI18N
-        SincronizeIcon.setText("Sincronize");
-        SincronizeIcon.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                SincronizeIconMouseEntered(evt);
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                SincronizeIconMouseExited(evt);
-            }
-        });
-
         javax.swing.GroupLayout OptionsPanelLayout = new javax.swing.GroupLayout(OptionsPanel);
         OptionsPanel.setLayout(OptionsPanelLayout);
         OptionsPanelLayout.setHorizontalGroup(
             OptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(OptionsPanelLayout.createSequentialGroup()
-                .addGap(30, 30, 30)
-                .addGroup(OptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(ReportIcon)
-                    .addComponent(ProjectsIcon)
-                    .addComponent(SincronizeIcon))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, OptionsPanelLayout.createSequentialGroup()
                 .addContainerGap(21, Short.MAX_VALUE)
-                .addGroup(OptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(CollaboratorsTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 208, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(LogoLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(CollaboratorsIcon, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(27, 27, 27))
+                .addGroup(OptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(OptionsPanelLayout.createSequentialGroup()
+                        .addComponent(ProjectsIcon, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, OptionsPanelLayout.createSequentialGroup()
+                        .addGroup(OptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(ReportIcon)
+                            .addComponent(SincronizeIcon)
+                            .addGroup(OptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(CollaboratorsTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 208, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(LogoLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(CollaboratorsIcon, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(27, 27, 27))))
         );
         OptionsPanelLayout.setVerticalGroup(
             OptionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(OptionsPanelLayout.createSequentialGroup()
                 .addGap(15, 15, 15)
                 .addComponent(LogoLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(CollaboratorsIcon)
-                .addGap(19, 19, 19)
-                .addComponent(CollaboratorsTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 367, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(ProjectsIcon)
                 .addGap(18, 18, 18)
+                .addComponent(ReportIcon)
+                .addGap(18, 18, 18)
                 .addComponent(SincronizeIcon)
                 .addGap(18, 18, 18)
-                .addComponent(ReportIcon)
+                .addComponent(CollaboratorsIcon)
+                .addGap(18, 18, 18)
+                .addComponent(CollaboratorsTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 416, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -325,7 +332,7 @@ public class UserFrame extends javax.swing.JFrame {
             NombreFiltrosPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(NombreFiltrosPanelLayout.createSequentialGroup()
                 .addGap(10, 10, 10)
-                .addComponent(NombreProyectoLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 49, Short.MAX_VALUE)
+                .addComponent(NombreProyectoLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(NombreFiltrosPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(ByActivityIcon, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -360,7 +367,7 @@ public class UserFrame extends javax.swing.JFrame {
         );
         TasksPanelLayout.setVerticalGroup(
             TasksPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(TreeTaskScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 580, Short.MAX_VALUE)
+            .addComponent(TreeTaskScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 586, Short.MAX_VALUE)
         );
 
         InfoCalendarPanel.setBackground(new java.awt.Color(214, 217, 225));
@@ -429,13 +436,13 @@ public class UserFrame extends javax.swing.JFrame {
                         .addGap(29, 29, 29))
                     .addGroup(InfoCalendarPanelLayout.createSequentialGroup()
                         .addGroup(InfoCalendarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(DevelopmentsScrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
+                            .addComponent(DevelopmentsScrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 386, Short.MAX_VALUE)
                             .addComponent(DevelopmentsLabel))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(InfoCalendarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(InfoCalendarPanelLayout.createSequentialGroup()
                                 .addComponent(EvidenceLabel)
-                                .addGap(0, 149, Short.MAX_VALUE))
+                                .addGap(0, 151, Short.MAX_VALUE))
                             .addComponent(EvidenceScrollPane))
                         .addContainerGap())))
         );
@@ -468,7 +475,7 @@ public class UserFrame extends javax.swing.JFrame {
                         .addComponent(TasksPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(InfoCalendarPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(NombreFiltrosPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 968, Short.MAX_VALUE)))
+                    .addComponent(NombreFiltrosPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 970, Short.MAX_VALUE)))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -491,14 +498,6 @@ public class UserFrame extends javax.swing.JFrame {
     private void CollaboratorsIconMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_CollaboratorsIconMouseExited
         
     }//GEN-LAST:event_CollaboratorsIconMouseExited
-
-    private void ReportIconMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ReportIconMouseEntered
-       ReportIcon.setForeground(java.awt.Color.decode("#FF6600"));
-    }//GEN-LAST:event_ReportIconMouseEntered
-
-    private void ReportIconMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ReportIconMouseExited
-       ReportIcon.setForeground(java.awt.Color.WHITE);
-    }//GEN-LAST:event_ReportIconMouseExited
 
     private void CollaboratorsIconMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_CollaboratorsIconMouseClicked
         // TODO add your handling code here:
@@ -534,13 +533,21 @@ public class UserFrame extends javax.swing.JFrame {
         ByCollaboratorIcon.setIcon(new ImageIcon("assets/bycollaborator.png"));
     }//GEN-LAST:event_ByCollaboratorIconMouseExited
 
+    private void ProjectsIconMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProjectsIconMouseEntered
+        ProjectsIcon.setForeground(java.awt.Color.decode("#FF6600"));
+    }//GEN-LAST:event_ProjectsIconMouseEntered
+
     private void ProjectsIconMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProjectsIconMouseExited
         ProjectsIcon.setForeground(java.awt.Color.WHITE);
     }//GEN-LAST:event_ProjectsIconMouseExited
 
-    private void ProjectsIconMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProjectsIconMouseEntered
-        ProjectsIcon.setForeground(java.awt.Color.decode("#FF6600"));
-    }//GEN-LAST:event_ProjectsIconMouseEntered
+    private void ReportIconMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ReportIconMouseEntered
+        ReportIcon.setForeground(java.awt.Color.decode("#FF6600"));
+    }//GEN-LAST:event_ReportIconMouseEntered
+
+    private void ReportIconMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ReportIconMouseExited
+        ReportIcon.setForeground(java.awt.Color.WHITE);
+    }//GEN-LAST:event_ReportIconMouseExited
 
     private void SincronizeIconMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SincronizeIconMouseEntered
         SincronizeIcon.setForeground(java.awt.Color.decode("#FF6600"));
@@ -549,6 +556,7 @@ public class UserFrame extends javax.swing.JFrame {
     private void SincronizeIconMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SincronizeIconMouseExited
         SincronizeIcon.setForeground(java.awt.Color.WHITE);
     }//GEN-LAST:event_SincronizeIconMouseExited
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList<String> ActiveList;
     private javax.swing.JScrollPane ActiveScrollPane;
