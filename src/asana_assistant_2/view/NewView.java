@@ -1,10 +1,10 @@
-package newviews;
+package asana_assistant_2.view;
 
-import control.ControlException;
-import control.IRouter;
-import control.daos.connection.Connection;
+import asana_assistant_1.control.ControlException;
+import asana_assistant_1.control.IRouter;
+import asana_assistant_1.control.daos.connection.Connection;
+import asana_assistant_1.view.View;
 import javax.swing.JFrame;
-import view.View;
 
 public class NewView extends View{
     

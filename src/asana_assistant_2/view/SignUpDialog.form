@@ -100,17 +100,17 @@
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="NameLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="NameTextField" alignment="3" pref="28" max="32767" attributes="0"/>
+                      <Component id="NameTextField" alignment="3" pref="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" pref="13" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="EmailLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="EmailTextField" alignment="3" pref="28" max="32767" attributes="0"/>
+                      <Component id="EmailTextField" alignment="3" pref="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" pref="13" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="AsanaidLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="AsanaidTextField" alignment="3" pref="28" max="32767" attributes="0"/>
+                      <Component id="AsanaidTextField" alignment="3" pref="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" pref="14" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
@@ -224,7 +224,7 @@
             </Property>
             <Property name="borderPainted" type="boolean" value="false"/>
             <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
-              <Color id="Cursor Por defecto"/>
+              <Color id="Default Cursor"/>
             </Property>
             <Property name="debugGraphicsOptions" type="int" value="-1"/>
             <Property name="focusPainted" type="boolean" value="false"/>

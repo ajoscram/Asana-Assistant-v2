@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package newviews;
+package asana_assistant_2.view;
 
 /**
  *
@@ -39,7 +39,6 @@ public class ProjectDialog extends javax.swing.JDialog {
         CollaborateList = new javax.swing.JList<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(380, 600));
 
         BackgroundPanel.setBackground(new java.awt.Color(29, 38, 52));
 

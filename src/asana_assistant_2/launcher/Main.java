@@ -1,9 +1,9 @@
-package newlauncher;
+package asana_assistant_2.launcher;
 
-import control.ControlException;
-import control.Router;
-import control.daos.connection.Connection;
-import newviews.NewView;
+import asana_assistant_1.control.ControlException;
+import asana_assistant_1.control.Router;
+import asana_assistant_1.control.daos.connection.Connection;
+import asana_assistant_2.view.NewView;
 
 
 public class Main {

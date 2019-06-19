@@ -3,14 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package newviews;
+package asana_assistant_2.view;
 
-import control.ControlException;
-import control.IRouter;
-import javafx.scene.paint.Color;
+import asana_assistant_1.control.ControlException;
+import asana_assistant_1.control.IRouter;
+import asana_assistant_1.model.User;
+import asana_assistant_1.view.View;
 import javax.swing.ImageIcon;
-import model.User;
-import view.View;
 
 /**
  *
@@ -26,6 +25,7 @@ public class LoginFrame extends javax.swing.JFrame {
         this.router = source.getRouter();
         ImageIcon icon = new ImageIcon("logo.png");
         this.setIconImage(icon.getImage());
+        this.setTitle("Asana Assistant");
     }
     /**
      * Creates new form LoginFrame
@@ -50,7 +50,6 @@ public class LoginFrame extends javax.swing.JFrame {
         SignUpButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(1280, 720));
         setResizable(false);
 
         LoginPanelBackground.setBackground(new java.awt.Color(29, 38, 52));

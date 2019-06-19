@@ -1,9 +1,11 @@
-package control;
+package asana_assistant_2.control;
 
+import asana_assistant_1.control.TaskParser;
+import asana_assistant_1.control.dtos.TaskDTO;
+import asana_assistant_1.control.dtos.UserDTO;
+import asana_assistant_1.model.Task.Type;
+import asana_assistant_1.parse.ParseException;
 import com.opencsv.CSVReader;
-import control.TaskParser;
-import control.dtos.TaskDTO;
-import control.dtos.UserDTO;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.Instant;
@@ -11,11 +13,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import model.Task;
-import model.Task.Type;
-import parse.ParseException;
 
 public class CSVTaskParser implements TaskParser {
     
@@ -96,7 +94,7 @@ public class CSVTaskParser implements TaskParser {
             throw new ParseException(ParseException.Type.STRUCTURE);
         else{
             int index = parent.getSubtasks().size();
-            parent.addSubtask(parse(line, Task.Type.SUBTASK, index));
+            parent.addSubtask(parse(line, Type.SUBTASK, index));
         }
     }
     
