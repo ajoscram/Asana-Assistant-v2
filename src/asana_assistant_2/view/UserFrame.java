@@ -1,5 +1,6 @@
 package asana_assistant_2.view;
 
+import asana_assistant_1.control.ControlException;
 import asana_assistant_1.control.IRouter;
 import asana_assistant_1.model.Project;
 import asana_assistant_1.model.User;
@@ -33,8 +34,13 @@ public class UserFrame extends javax.swing.JFrame {
         this.user = user;
         
         this.activeCollaboratorsListModel = new DefaultListModel();
+        this.ActiveList.setModel(activeCollaboratorsListModel);
+        
         this.bannedCollaboratorsListModel = new DefaultListModel();
+        this.BannedList.setModel(bannedCollaboratorsListModel);
+        
         this.tasksTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode("root"));
+        this.TasksTree.setModel(tasksTreeModel);
         
         //tasks
         this.TasksTree.setCellRenderer(new TaskTreeCellRenderer(router));
@@ -46,11 +52,8 @@ public class UserFrame extends javax.swing.JFrame {
         closeProject();
     }
     
-    public void openProject(long id){
-    }
-    
     private void closeProject(){
-        project = null;
+        this.project = null;
         this.ProjectsIcon.setText("Open");
         this.ReportIcon.setVisible(false);
         this.SincronizeIcon.setVisible(false);
@@ -59,6 +62,40 @@ public class UserFrame extends javax.swing.JFrame {
         this.NombreFiltrosPanel.setVisible(false);
         this.TasksPanel.setVisible(false);
         this.InfoCalendarPanel.setVisible(false);
+    }
+    
+    private void resetFilters(){
+        this.ToDateChooser.setDate(null);
+        this.FromDateChooser.setDate(null);
+        this.CollaboratorComboBox.setSelectedItem(0);
+        this.TaskComboBox.setSelectedItem(0);
+    }
+    
+    public void openProject(long id){
+        try {
+            Project project = router.getProject(id);
+            this.NombreProyectoLabel.setText(project.getName());
+            
+            //populating collaborators
+            
+            
+            //populating filters
+            
+            this.resetFilters();
+            
+            //enabling everything
+            this.ProjectsIcon.setText("Close");
+            this.ReportIcon.setVisible(true);
+            this.SincronizeIcon.setVisible(true);
+            this.CollaboratorsIcon.setVisible(true);
+            this.CollaboratorsTabbedPane.setVisible(true);
+            this.NombreFiltrosPanel.setVisible(true);
+            this.TasksPanel.setVisible(true);
+            this.InfoCalendarPanel.setVisible(true);
+            this.project = project;
+        } catch (ControlException ex) {
+            View.displayError(this, ex);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -70,9 +107,9 @@ public class UserFrame extends javax.swing.JFrame {
         LogoLabel = new javax.swing.JLabel();
         CollaboratorsTabbedPane = new javax.swing.JTabbedPane();
         ActiveScrollPane = new javax.swing.JScrollPane();
-        ActiveList = new javax.swing.JList<>();
+        ActiveList = new javax.swing.JList();
         BannedScrollPane = new javax.swing.JScrollPane();
-        BannedList = new javax.swing.JList<>();
+        BannedList = new javax.swing.JList();
         SincronizeIcon = new javax.swing.JLabel();
         ProjectsIcon = new javax.swing.JLabel();
         ReportIcon = new javax.swing.JLabel();
@@ -566,10 +603,10 @@ public class UserFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_ProjectsIconMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JList<String> ActiveList;
+    private javax.swing.JList ActiveList;
     private javax.swing.JScrollPane ActiveScrollPane;
     private javax.swing.JLabel AsignadoLabel;
-    private javax.swing.JList<String> BannedList;
+    private javax.swing.JList BannedList;
     private javax.swing.JScrollPane BannedScrollPane;
     private javax.swing.JLabel ByActivityIcon;
     private javax.swing.JSeparator ByActivitySeparator;
