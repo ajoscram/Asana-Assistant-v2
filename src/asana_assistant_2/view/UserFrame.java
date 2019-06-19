@@ -3,17 +3,23 @@ package asana_assistant_2.view;
 import asana_assistant_1.control.ControlException;
 import asana_assistant_1.control.IRouter;
 import asana_assistant_1.control.JSONTaskParser;
+import asana_assistant_1.control.dtos.DevelopmentFilter;
 import asana_assistant_1.control.dtos.DisplayString;
 import asana_assistant_1.control.dtos.TaskFilter;
 import asana_assistant_1.model.Project;
 import asana_assistant_1.model.Task;
 import asana_assistant_1.model.User;
 import asana_assistant_1.parse.ParseException;
+import asana_assistant_1.report.ReportException;
+import asana_assistant_1.report.printers.PDFReportPrinter;
 import asana_assistant_1.view.DefaultView;
 import asana_assistant_1.view.TaskTreeCellRenderer;
 import asana_assistant_1.view.View;
 import asana_assistant_2.control.CSVTaskParser;
 import java.awt.Frame;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
@@ -26,6 +32,7 @@ import javax.swing.tree.TreeSelectionModel;
 public class UserFrame extends javax.swing.JFrame {
     private static final String JSON_DESCRIPTION = "JSON (.json)";
     private static final String CSV_DESCRIPTION = "CSV (.csv)";
+    private static final String PDF_DESCRIPTION = "PDF (.pdf)";
     
     private LoginFrame parent;
     private IRouter router;
@@ -37,6 +44,9 @@ public class UserFrame extends javax.swing.JFrame {
     private final DefaultListModel activeCollaboratorsListModel;
     private final DefaultListModel bannedCollaboratorsListModel;
     private final DefaultTreeModel tasksTreeModel;
+    
+    private final DefaultListModel developmentsListModel;
+    private final DefaultListModel evidenceListModel;
     
     public UserFrame(View source, LoginFrame parent, User user) {
         initComponents();
@@ -55,12 +65,21 @@ public class UserFrame extends javax.swing.JFrame {
         this.bannedCollaboratorsListModel = new DefaultListModel();
         this.BannedList.setModel(bannedCollaboratorsListModel);
         
+        this.developmentsListModel = new DefaultListModel();
+        this.DevelopmentsList.setModel(developmentsListModel);
+        
+        this.evidenceListModel = new DefaultListModel();
+        this.EvidenceList.setModel(evidenceListModel);
+        
         this.tasksTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode("root"));
         this.TasksTree.setRootVisible(false);
         this.TasksTree.setCellRenderer(new TaskTreeCellRenderer(router));
         this.TasksTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         this.TasksTree.setModel(tasksTreeModel);
         this.TasksTree.setShowsRootHandles(true);
+        
+        this.FromDateChooser.getDateEditor().setEnabled(false);
+        this.ToDateChooser.getDateEditor().setEnabled(false);
         
         //called to disable all unwanted interface options
         closeProject();
@@ -108,6 +127,8 @@ public class UserFrame extends javax.swing.JFrame {
     }
     
     private void resetFilters(){
+        this.FromDateChooser.setDate(null);
+        this.ToDateChooser.setDate(null);
         this.CollaboratorComboBox.setSelectedItem(null);
         this.TaskComboBox.setSelectedItem(null);
     }
@@ -168,7 +189,21 @@ public class UserFrame extends javax.swing.JFrame {
                     TasksTree.expandRow(i);
             }
         } catch(ControlException ex){
-            DefaultView.displayError(this, ex);
+            View.displayError(this, ex);
+        }
+    }
+    
+    public void reloadDevelopments(Task task){
+        try{
+            developmentsListModel.clear();
+            if(task != null){
+                DevelopmentFilter filter = getDevelopmentFilter();
+                List<DisplayString> developments = router.getDevelopmentStrings(task.getId(), filter);
+                for(DisplayString development : developments)
+                    developmentsListModel.addElement(development);
+            }
+        } catch(ControlException ex){
+            View.displayError(this, ex);
         }
     }
 
@@ -181,7 +216,7 @@ public class UserFrame extends javax.swing.JFrame {
                 router.banUser(project.getId(), collaborator.getId());
                 reloadCollaboratorLists(project);
             } catch (ControlException ex) {
-                DefaultView.displayError(this, ex);
+                View.displayError(this, ex);
             }
         }
     }
@@ -219,6 +254,8 @@ public class UserFrame extends javax.swing.JFrame {
                 else
                     AsignadoLabel.setText(asignee.toString());
                 
+                reloadDevelopments(task);
+                
                 this.InfoCalendarPanel.setVisible(true);
             }
         } catch(ControlException ex){
@@ -247,10 +284,55 @@ public class UserFrame extends javax.swing.JFrame {
                     reloadCollaboratorLists(project);
                     DefaultView.displayInfo(this, "Tasks synchronized successfullly.");
                 } catch(ControlException ex){
-                    DefaultView.displayError(this, ex);
+                    View.displayError(this, ex);
                 } catch(ParseException ex){
-                    DefaultView.displayError(this, ex);
+                    View.displayError(this, ex);
                 }
+            }
+        }
+    }
+    
+    private DevelopmentFilter getDevelopmentFilter(){
+        LocalDate start = null;
+        LocalDate end = null;
+        Date start_ = FromDateChooser.getDate();
+        if(start_ != null)
+            start = start_.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        Date end_ = ToDateChooser.getDate();
+        if(end_ != null)
+            end = end_.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        return new DevelopmentFilter(start, end);
+    }
+    
+    private TaskFilter getTaskFilter(){
+        Long userId = null;
+        Long taskId = null;
+        Object task = TaskComboBox.getSelectedItem();
+        if(task instanceof DisplayString)
+            taskId = ((DisplayString)task).getId();
+        return null;
+    }
+    
+    private void printReport(){
+        JFileChooser chooser  = new JFileChooser();
+        chooser.setDialogTitle("Select Directory");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.addChoosableFileFilter(new FileNameExtensionFilter(PDF_DESCRIPTION, "pdf"));
+        chooser.setAcceptAllFileFilterUsed(false);
+        if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
+        {
+            try{
+                String path = chooser.getSelectedFile().getAbsolutePath();
+                DevelopmentFilter developmentFilter = getDevelopmentFilter();
+                TaskFilter taskFilter = getTaskFilter();
+                if(chooser.getFileFilter().getDescription().equals(PDF_DESCRIPTION)){
+                   String filepath = path + "\\" + LocalDate.now() + " Report.pdf";
+                   router.printReport(project.getId(), filepath, new PDFReportPrinter(), taskFilter, developmentFilter);
+                }
+            } catch(ControlException ex){
+                View.displayError(this, ex);
+            } catch(ReportException ex){
+                View.displayError(this, ex);
             }
         }
     }
@@ -263,6 +345,8 @@ public class UserFrame extends javax.swing.JFrame {
         banCollaboratorMenuItem = new javax.swing.JMenuItem();
         bannedCollaboratorsPopupMenu = new javax.swing.JPopupMenu();
         unbanCollaboratorMenuItem = new javax.swing.JMenuItem();
+        developmentsPopupMenu = new javax.swing.JPopupMenu();
+        addDevelopmentMenuItem = new javax.swing.JMenuItem();
         OptionsPanel = new javax.swing.JPanel();
         CollaboratorsIcon = new javax.swing.JLabel();
         LogoLabel = new javax.swing.JLabel();
@@ -296,9 +380,9 @@ public class UserFrame extends javax.swing.JFrame {
         InfoCalendarPanel = new javax.swing.JPanel();
         calendar = new com.toedter.calendar.JCalendar();
         DevelopmentsScrollpane = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList();
+        DevelopmentsList = new javax.swing.JList();
         EvidenceScrollPane = new javax.swing.JScrollPane();
-        jList2 = new javax.swing.JList();
+        EvidenceList = new javax.swing.JList();
         AsignadoLabel = new javax.swing.JLabel();
         NombreTareaLabel = new javax.swing.JLabel();
         DevelopmentsLabel = new javax.swing.JLabel();
@@ -319,6 +403,14 @@ public class UserFrame extends javax.swing.JFrame {
             }
         });
         bannedCollaboratorsPopupMenu.add(unbanCollaboratorMenuItem);
+
+        addDevelopmentMenuItem.setText("Add Development on Selected Date");
+        addDevelopmentMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addDevelopmentMenuItemActionPerformed(evt);
+            }
+        });
+        developmentsPopupMenu.add(addDevelopmentMenuItem);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(1280, 720));
@@ -598,19 +690,20 @@ public class UserFrame extends javax.swing.JFrame {
         calendar.setSundayForeground(new java.awt.Color(255, 102, 0));
         calendar.setWeekdayForeground(new java.awt.Color(255, 255, 255));
 
-        jList1.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
-        jList1.setForeground(new java.awt.Color(85, 96, 115));
-        jList1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        jList1.setSelectionBackground(new java.awt.Color(255, 102, 0));
-        jList1.setSelectionForeground(new java.awt.Color(243, 242, 242));
-        DevelopmentsScrollpane.setViewportView(jList1);
+        DevelopmentsList.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
+        DevelopmentsList.setForeground(new java.awt.Color(85, 96, 115));
+        DevelopmentsList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        DevelopmentsList.setComponentPopupMenu(developmentsPopupMenu);
+        DevelopmentsList.setSelectionBackground(new java.awt.Color(255, 102, 0));
+        DevelopmentsList.setSelectionForeground(new java.awt.Color(243, 242, 242));
+        DevelopmentsScrollpane.setViewportView(DevelopmentsList);
 
-        jList2.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
-        jList2.setForeground(new java.awt.Color(85, 96, 115));
-        jList2.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        jList2.setSelectionBackground(new java.awt.Color(255, 102, 0));
-        jList2.setSelectionForeground(new java.awt.Color(243, 242, 242));
-        EvidenceScrollPane.setViewportView(jList2);
+        EvidenceList.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
+        EvidenceList.setForeground(new java.awt.Color(85, 96, 115));
+        EvidenceList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        EvidenceList.setSelectionBackground(new java.awt.Color(255, 102, 0));
+        EvidenceList.setSelectionForeground(new java.awt.Color(243, 242, 242));
+        EvidenceScrollPane.setViewportView(EvidenceList);
 
         AsignadoLabel.setFont(new java.awt.Font("Proxima Nova Rg", 1, 18)); // NOI18N
         AsignadoLabel.setForeground(new java.awt.Color(85, 96, 115));
@@ -775,6 +868,10 @@ public class UserFrame extends javax.swing.JFrame {
         synchronizeTasks();
     }//GEN-LAST:event_SincronizeIconMouseClicked
 
+    private void addDevelopmentMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addDevelopmentMenuItemActionPerformed
+        new AddDevelopmentDialog(source, this, task, calendar.getDate()).setVisible(true);
+    }//GEN-LAST:event_addDevelopmentMenuItemActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList ActiveList;
     private javax.swing.JScrollPane ActiveScrollPane;
@@ -791,8 +888,10 @@ public class UserFrame extends javax.swing.JFrame {
     private javax.swing.JLabel CollaboratorsIcon;
     private javax.swing.JTabbedPane CollaboratorsTabbedPane;
     private javax.swing.JLabel DevelopmentsLabel;
+    private javax.swing.JList DevelopmentsList;
     private javax.swing.JScrollPane DevelopmentsScrollpane;
     private javax.swing.JLabel EvidenceLabel;
+    private javax.swing.JList EvidenceList;
     private javax.swing.JScrollPane EvidenceScrollPane;
     private javax.swing.JLabel FiltersLabel;
     private com.toedter.calendar.JDateChooser FromDateChooser;
@@ -813,11 +912,11 @@ public class UserFrame extends javax.swing.JFrame {
     private javax.swing.JLabel ToLabel;
     private javax.swing.JScrollPane TreeTaskScrollPane;
     private javax.swing.JPopupMenu activeCollaboratorsPopupMenu;
+    private javax.swing.JMenuItem addDevelopmentMenuItem;
     private javax.swing.JMenuItem banCollaboratorMenuItem;
     private javax.swing.JPopupMenu bannedCollaboratorsPopupMenu;
     private com.toedter.calendar.JCalendar calendar;
-    private javax.swing.JList jList1;
-    private javax.swing.JList jList2;
+    private javax.swing.JPopupMenu developmentsPopupMenu;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JMenuItem unbanCollaboratorMenuItem;
     // End of variables declaration//GEN-END:variables
