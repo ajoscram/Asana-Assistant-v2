@@ -8,6 +8,7 @@ package asana_assistant_2.view;
 import asana_assistant_1.control.ControlException;
 import asana_assistant_1.control.IRouter;
 import asana_assistant_1.control.dtos.DisplayString;
+import asana_assistant_1.model.Project;
 import asana_assistant_1.model.User;
 import asana_assistant_1.view.View;
 import java.util.List;
@@ -66,6 +67,24 @@ public class ProjectDialog extends javax.swing.JDialog {
             NewView.displayError(this, ex);
         }
     }
+    private void openProject(){
+        try {
+            Project project;
+            if(this.ProjectsTabbedPane.getSelectedComponent() == this.ManageScrollPane && this.ManagedList.getSelectedValue() != null){
+                project = router.getProject(((DisplayString)ManagedList.getSelectedValue()).getId());
+                parent.openProject(project.getId());
+                this.setVisible(false);
+            } else if(this.ProjectsTabbedPane.getSelectedComponent() == this.CollaborateScrollPane && this.CollaborateList.getSelectedValue() != null) {
+                project = router.getProject(((DisplayString)CollaborateList.getSelectedValue()).getId());
+                parent.openProject(project.getId());
+                this.setVisible(false);
+            }
+            else
+                NewView.displayError(this, "Please select a project first.");
+        } catch (ControlException ex) {
+            NewView.displayError(this, ex);
+        }
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -76,16 +95,27 @@ public class ProjectDialog extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        TabbedPanePopupMenu = new javax.swing.JPopupMenu();
+        OpenProjectSelectedMenuItem = new javax.swing.JMenuItem();
         BackgroundPanel = new javax.swing.JPanel();
         ProjectsLabel = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jSeparator1 = new javax.swing.JSeparator();
         ProjectsTabbedPane = new javax.swing.JTabbedPane();
         ManageScrollPane = new javax.swing.JScrollPane();
-        ManagedList = new javax.swing.JList<>();
+        ManagedList = new javax.swing.JList();
         CollaborateScrollPane = new javax.swing.JScrollPane();
-        CollaborateList = new javax.swing.JList<>();
+        CollaborateList = new javax.swing.JList();
         AddProjectButton = new javax.swing.JButton();
+
+        OpenProjectSelectedMenuItem.setText("Open Selected Project");
+        OpenProjectSelectedMenuItem.setActionCommand("OpenSelectedProject");
+        OpenProjectSelectedMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                OpenProjectSelectedMenuItemActionPerformed(evt);
+            }
+        });
+        TabbedPanePopupMenu.add(OpenProjectSelectedMenuItem);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setResizable(false);
@@ -122,11 +152,12 @@ public class ProjectDialog extends javax.swing.JDialog {
 
         ManagedList.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
         ManagedList.setForeground(new java.awt.Color(85, 96, 115));
-        ManagedList.setModel(new javax.swing.AbstractListModel<String>() {
+        ManagedList.setModel(new javax.swing.AbstractListModel() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
+            public Object getElementAt(int i) { return strings[i]; }
         });
+        ManagedList.setComponentPopupMenu(TabbedPanePopupMenu);
         ManageScrollPane.setViewportView(ManagedList);
 
         ProjectsTabbedPane.addTab("Manage", ManageScrollPane);
@@ -135,11 +166,12 @@ public class ProjectDialog extends javax.swing.JDialog {
 
         CollaborateList.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
         CollaborateList.setForeground(new java.awt.Color(85, 96, 115));
-        CollaborateList.setModel(new javax.swing.AbstractListModel<String>() {
+        CollaborateList.setModel(new javax.swing.AbstractListModel() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
+            public Object getElementAt(int i) { return strings[i]; }
         });
+        CollaborateList.setComponentPopupMenu(TabbedPanePopupMenu);
         CollaborateScrollPane.setViewportView(CollaborateList);
 
         ProjectsTabbedPane.addTab("Collaborate", CollaborateScrollPane);
@@ -208,17 +240,23 @@ public class ProjectDialog extends javax.swing.JDialog {
         new AddProjectDialog(source,this,user).setVisible(true);
     }//GEN-LAST:event_AddProjectButtonActionPerformed
 
+    private void OpenProjectSelectedMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OpenProjectSelectedMenuItemActionPerformed
+        openProject();
+    }//GEN-LAST:event_OpenProjectSelectedMenuItemActionPerformed
+
    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton AddProjectButton;
     private javax.swing.JPanel BackgroundPanel;
-    private javax.swing.JList<String> CollaborateList;
+    private javax.swing.JList CollaborateList;
     private javax.swing.JScrollPane CollaborateScrollPane;
     private javax.swing.JScrollPane ManageScrollPane;
-    private javax.swing.JList<String> ManagedList;
+    private javax.swing.JList ManagedList;
+    private javax.swing.JMenuItem OpenProjectSelectedMenuItem;
     private javax.swing.JLabel ProjectsLabel;
     private javax.swing.JTabbedPane ProjectsTabbedPane;
+    private javax.swing.JPopupMenu TabbedPanePopupMenu;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JSeparator jSeparator1;
     // End of variables declaration//GEN-END:variables
