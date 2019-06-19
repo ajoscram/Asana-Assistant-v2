@@ -2,10 +2,14 @@ package asana_assistant_2.view;
 
 import asana_assistant_1.control.ControlException;
 import asana_assistant_1.control.IRouter;
+import asana_assistant_1.control.dtos.DisplayString;
+import asana_assistant_1.control.dtos.TaskFilter;
 import asana_assistant_1.model.Project;
 import asana_assistant_1.model.User;
+import asana_assistant_1.view.DefaultView;
 import asana_assistant_1.view.TaskTreeCellRenderer;
 import asana_assistant_1.view.View;
+import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -13,6 +17,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
 public class UserFrame extends javax.swing.JFrame {
+    
     private LoginFrame parent;
     private IRouter router;
     private View source;
@@ -40,9 +45,7 @@ public class UserFrame extends javax.swing.JFrame {
         this.BannedList.setModel(bannedCollaboratorsListModel);
         
         this.tasksTreeModel = new DefaultTreeModel(new DefaultMutableTreeNode("root"));
-        this.TasksTree.setModel(tasksTreeModel);
-        
-        //tasks
+        this.TasksTree.setRootVisible(false);
         this.TasksTree.setCellRenderer(new TaskTreeCellRenderer(router));
         this.TasksTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         this.TasksTree.setModel(tasksTreeModel);
@@ -64,24 +67,17 @@ public class UserFrame extends javax.swing.JFrame {
         this.InfoCalendarPanel.setVisible(false);
     }
     
-    private void resetFilters(){
-        this.ToDateChooser.setDate(null);
-        this.FromDateChooser.setDate(null);
-        this.CollaboratorComboBox.setSelectedItem(0);
-        this.TaskComboBox.setSelectedItem(0);
-    }
-    
     public void openProject(long id){
         try {
             Project project = router.getProject(id);
             this.NombreProyectoLabel.setText(project.getName());
             
             //populating collaborators
-            
+            reloadCollaboratorLists(id);
             
             //populating filters
-            
-            this.resetFilters();
+            reloadFilters();
+            resetFilters();
             
             //enabling everything
             this.ProjectsIcon.setText("Close");
@@ -91,17 +87,113 @@ public class UserFrame extends javax.swing.JFrame {
             this.CollaboratorsTabbedPane.setVisible(true);
             this.NombreFiltrosPanel.setVisible(true);
             this.TasksPanel.setVisible(true);
-            this.InfoCalendarPanel.setVisible(true);
             this.project = project;
         } catch (ControlException ex) {
             View.displayError(this, ex);
         }
     }
+    
+    private void resetFilters(){
+        this.CollaboratorComboBox.setSelectedItem(null);
+        this.TaskComboBox.setSelectedItem(null);
+    }
+    
+    private void reloadFilters(){
+        try{
+            List<DisplayString> tasks = router.getTaskStrings(project.getId());
+            TaskComboBox.removeAllItems();
+            for(DisplayString task : tasks)
+                TaskComboBox.addItem(task);
+            
+            List<DisplayString> activeCollaborators = router.getActiveUserStrings(project.getId());
+            List<DisplayString> bannedCollaborators = router.getBannedUserStrings(project.getId());
+            CollaboratorComboBox.removeAllItems();
+            for(DisplayString collaborator : activeCollaborators)
+                CollaboratorComboBox.addItem(collaborator);
+            for(DisplayString collaborator : bannedCollaborators)
+                CollaboratorComboBox.addItem(collaborator);
+        } catch(ControlException ex){
+            DefaultView.displayError(this, ex);
+        }
+    }
+    
+    private void reloadCollaboratorLists(long project_id){
+        try{
+            List<DisplayString> activeCollaborators = router.getActiveUserStrings(project_id);
+            List<DisplayString> bannedCollaborators = router.getBannedUserStrings(project_id);
+            
+            this.activeCollaboratorsListModel.clear();
+            for(DisplayString collaborator : activeCollaborators)
+                activeCollaboratorsListModel.addElement(collaborator);  
+            
+            this.bannedCollaboratorsListModel.clear();
+            for(DisplayString collaborator : bannedCollaborators)
+                bannedCollaboratorsListModel.addElement(collaborator);
+        } catch(ControlException ex){
+            DefaultView.displayError(this, ex);
+        }
+    }
+    
+    private DefaultMutableTreeNode getTaskNode(DisplayString task, TaskFilter filter) throws ControlException{
+        DefaultMutableTreeNode node = new DefaultMutableTreeNode(task);
+        for(DisplayString subtask : router.getSubtaskStrings(task.getId(), filter))
+            node.add(getTaskNode(subtask, filter));
+        return node;
+    }
+    
+    private void filterTasks(TaskFilter filter){
+        try{
+            if(project != null){
+                DefaultMutableTreeNode root = (DefaultMutableTreeNode)tasksTreeModel.getRoot();
+                root.removeAllChildren();
+                List<DisplayString> tasks = router.getTaskStrings(project.getId(), filter);
+                for(DisplayString task : tasks)
+                    root.add(getTaskNode(task, filter));
+                tasksTreeModel.reload();
+                for(int i = 0; i < TasksTree.getRowCount(); i++)
+                    TasksTree.expandRow(i);
+            }
+        } catch(ControlException ex){
+            DefaultView.displayError(this, ex);
+        }
+    }
 
+    private void banSelectedCollaborator(){
+        DisplayString collaborator = (DisplayString)ActiveList.getSelectedValue();
+        if(collaborator == null)
+            DefaultView.displayError(this, "You must select an active collaborator to ban.");
+        else{
+            try {
+                router.banUser(project.getId(), collaborator.getId());
+                reloadCollaboratorLists(project.getId());
+            } catch (ControlException ex) {
+                DefaultView.displayError(this, ex);
+            }
+        }
+    }
+    
+    private void unbanSelectedCollaborator(){
+        DisplayString collaborator = (DisplayString)BannedList.getSelectedValue();
+        if(collaborator == null)
+            DefaultView.displayError(this, "You must select a banned collaborator to un-ban.");
+        else{
+            try {
+                router.unbanUser(project.getId(), collaborator.getId());
+                reloadCollaboratorLists(project.getId());
+            } catch (ControlException ex) {
+                DefaultView.displayError(this, ex);
+            }
+        }
+    }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        activeCollaboratorsPopupMenu = new javax.swing.JPopupMenu();
+        banCollaboratorMenuItem = new javax.swing.JMenuItem();
+        bannedCollaboratorsPopupMenu = new javax.swing.JPopupMenu();
+        unbanCollaboratorMenuItem = new javax.swing.JMenuItem();
         OptionsPanel = new javax.swing.JPanel();
         CollaboratorsIcon = new javax.swing.JLabel();
         LogoLabel = new javax.swing.JLabel();
@@ -126,8 +218,8 @@ public class UserFrame extends javax.swing.JFrame {
         ByCollaboratorSeparator = new javax.swing.JSeparator();
         ByActivitySeparator = new javax.swing.JSeparator();
         ByDateSeparator = new javax.swing.JSeparator();
-        TaskComboBox = new javax.swing.JComboBox<>();
-        CollaboratorComboBox = new javax.swing.JComboBox<>();
+        TaskComboBox = new javax.swing.JComboBox();
+        CollaboratorComboBox = new javax.swing.JComboBox();
         jSeparator1 = new javax.swing.JSeparator();
         TasksPanel = new javax.swing.JPanel();
         TreeTaskScrollPane = new javax.swing.JScrollPane();
@@ -135,13 +227,29 @@ public class UserFrame extends javax.swing.JFrame {
         InfoCalendarPanel = new javax.swing.JPanel();
         calendar = new com.toedter.calendar.JCalendar();
         DevelopmentsScrollpane = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
+        jList1 = new javax.swing.JList();
         EvidenceScrollPane = new javax.swing.JScrollPane();
-        jList2 = new javax.swing.JList<>();
+        jList2 = new javax.swing.JList();
         AsignadoLabel = new javax.swing.JLabel();
         NombreTareaLabel = new javax.swing.JLabel();
         DevelopmentsLabel = new javax.swing.JLabel();
         EvidenceLabel = new javax.swing.JLabel();
+
+        banCollaboratorMenuItem.setText("Ban Selected Collaborator");
+        banCollaboratorMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                banCollaboratorMenuItemActionPerformed(evt);
+            }
+        });
+        activeCollaboratorsPopupMenu.add(banCollaboratorMenuItem);
+
+        unbanCollaboratorMenuItem.setText("Un-ban Selected Collaborator");
+        unbanCollaboratorMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                unbanCollaboratorMenuItemActionPerformed(evt);
+            }
+        });
+        bannedCollaboratorsPopupMenu.add(unbanCollaboratorMenuItem);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(1280, 720));
@@ -179,6 +287,7 @@ public class UserFrame extends javax.swing.JFrame {
         ActiveList.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
         ActiveList.setForeground(new java.awt.Color(85, 96, 115));
         ActiveList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        ActiveList.setComponentPopupMenu(activeCollaboratorsPopupMenu);
         ActiveList.setSelectionBackground(new java.awt.Color(255, 102, 0));
         ActiveList.setSelectionForeground(new java.awt.Color(243, 242, 242));
         ActiveScrollPane.setViewportView(ActiveList);
@@ -192,6 +301,7 @@ public class UserFrame extends javax.swing.JFrame {
         BannedList.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
         BannedList.setForeground(new java.awt.Color(85, 96, 115));
         BannedList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        BannedList.setComponentPopupMenu(bannedCollaboratorsPopupMenu);
         BannedList.setSelectionBackground(new java.awt.Color(255, 102, 0));
         BannedList.setSelectionForeground(new java.awt.Color(243, 242, 242));
         BannedScrollPane.setViewportView(BannedList);
@@ -333,10 +443,6 @@ public class UserFrame extends javax.swing.JFrame {
 
         ByDateSeparator.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
-        TaskComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-        CollaboratorComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
         javax.swing.GroupLayout NombreFiltrosPanelLayout = new javax.swing.GroupLayout(NombreFiltrosPanel);
         NombreFiltrosPanel.setLayout(NombreFiltrosPanelLayout);
         NombreFiltrosPanelLayout.setHorizontalGroup(
@@ -401,6 +507,9 @@ public class UserFrame extends javax.swing.JFrame {
         TasksPanel.setBackground(new java.awt.Color(204, 204, 204));
 
         TreeTaskScrollPane.setBorder(null);
+
+        javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
+        TasksTree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         TreeTaskScrollPane.setViewportView(TasksTree);
 
         javax.swing.GroupLayout TasksPanelLayout = new javax.swing.GroupLayout(TasksPanel);
@@ -425,17 +534,14 @@ public class UserFrame extends javax.swing.JFrame {
 
         jList1.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
         jList1.setForeground(new java.awt.Color(85, 96, 115));
+        jList1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jList1.setSelectionBackground(new java.awt.Color(255, 102, 0));
         jList1.setSelectionForeground(new java.awt.Color(243, 242, 242));
         DevelopmentsScrollpane.setViewportView(jList1);
 
         jList2.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
         jList2.setForeground(new java.awt.Color(85, 96, 115));
-        jList2.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
+        jList2.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jList2.setSelectionBackground(new java.awt.Color(255, 102, 0));
         jList2.setSelectionForeground(new java.awt.Color(243, 242, 242));
         EvidenceScrollPane.setViewportView(jList2);
@@ -477,14 +583,14 @@ public class UserFrame extends javax.swing.JFrame {
                         .addGap(29, 29, 29))
                     .addGroup(InfoCalendarPanelLayout.createSequentialGroup()
                         .addGroup(InfoCalendarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(DevelopmentsScrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 386, Short.MAX_VALUE)
+                            .addComponent(DevelopmentsScrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 373, Short.MAX_VALUE)
                             .addComponent(DevelopmentsLabel))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(InfoCalendarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(InfoCalendarPanelLayout.createSequentialGroup()
                                 .addComponent(EvidenceLabel)
-                                .addGap(0, 151, Short.MAX_VALUE))
-                            .addComponent(EvidenceScrollPane))
+                                .addGap(0, 164, Short.MAX_VALUE))
+                            .addComponent(EvidenceScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 246, Short.MAX_VALUE))
                         .addContainerGap())))
         );
         InfoCalendarPanelLayout.setVerticalGroup(
@@ -602,6 +708,14 @@ public class UserFrame extends javax.swing.JFrame {
         new ProjectDialog(source,this,user).setVisible(true);
     }//GEN-LAST:event_ProjectsIconMouseClicked
 
+    private void banCollaboratorMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_banCollaboratorMenuItemActionPerformed
+        banSelectedCollaborator();
+    }//GEN-LAST:event_banCollaboratorMenuItemActionPerformed
+
+    private void unbanCollaboratorMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unbanCollaboratorMenuItemActionPerformed
+        unbanSelectedCollaborator();
+    }//GEN-LAST:event_unbanCollaboratorMenuItemActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList ActiveList;
     private javax.swing.JScrollPane ActiveScrollPane;
@@ -614,7 +728,7 @@ public class UserFrame extends javax.swing.JFrame {
     private javax.swing.JSeparator ByCollaboratorSeparator;
     private javax.swing.JLabel ByDateIcon;
     private javax.swing.JSeparator ByDateSeparator;
-    private javax.swing.JComboBox<String> CollaboratorComboBox;
+    private javax.swing.JComboBox CollaboratorComboBox;
     private javax.swing.JLabel CollaboratorsIcon;
     private javax.swing.JTabbedPane CollaboratorsTabbedPane;
     private javax.swing.JLabel DevelopmentsLabel;
@@ -633,15 +747,19 @@ public class UserFrame extends javax.swing.JFrame {
     private javax.swing.JLabel ProjectsIcon;
     private javax.swing.JLabel ReportIcon;
     private javax.swing.JLabel SincronizeIcon;
-    private javax.swing.JComboBox<String> TaskComboBox;
+    private javax.swing.JComboBox TaskComboBox;
     private javax.swing.JPanel TasksPanel;
     private javax.swing.JTree TasksTree;
     private com.toedter.calendar.JDateChooser ToDateChooser;
     private javax.swing.JLabel ToLabel;
     private javax.swing.JScrollPane TreeTaskScrollPane;
+    private javax.swing.JPopupMenu activeCollaboratorsPopupMenu;
+    private javax.swing.JMenuItem banCollaboratorMenuItem;
+    private javax.swing.JPopupMenu bannedCollaboratorsPopupMenu;
     private com.toedter.calendar.JCalendar calendar;
-    private javax.swing.JList<String> jList1;
-    private javax.swing.JList<String> jList2;
+    private javax.swing.JList jList1;
+    private javax.swing.JList jList2;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JMenuItem unbanCollaboratorMenuItem;
     // End of variables declaration//GEN-END:variables
 }
