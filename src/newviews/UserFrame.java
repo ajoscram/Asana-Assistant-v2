@@ -5,8 +5,10 @@
  */
 package newviews;
 
+import control.IRouter;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import model.User;
 import view.View;
 
 /**
@@ -14,17 +16,20 @@ import view.View;
  * @author Gabriel
  */
 public class UserFrame extends javax.swing.JFrame {
-    private static LoginFrame parent;
-    /**
-     * Creates new form UserFrame
-     */
-    public UserFrame(newviews.LoginFrame parent) {
+    private LoginFrame parent;
+    private IRouter router;
+    private View source;
+    private User user;
+    
+    
+    public UserFrame(View source, LoginFrame parent, User user) {
         initComponents();
-        this.parent=parent;
         this.setLocationRelativeTo(parent);
         this.setIconImage(parent.getIconImage());
-       
-        //this.router = source.getRouter();
+        this.parent = parent;
+        this.source = source;
+        this.router = source.getRouter();
+        this.user = user;
     }
 
     /**

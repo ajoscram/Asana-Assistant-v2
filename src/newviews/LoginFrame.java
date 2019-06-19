@@ -5,8 +5,11 @@
  */
 package newviews;
 
+import control.ControlException;
+import control.IRouter;
 import javafx.scene.paint.Color;
 import javax.swing.ImageIcon;
+import model.User;
 import view.View;
 
 /**
@@ -14,13 +17,13 @@ import view.View;
  * @author Gabriel
  */
 public class LoginFrame extends javax.swing.JFrame {
-    private static View source;
-    //private IRouter router;
+    private View source;
+    private IRouter router;
     
     public LoginFrame(View source) {
         initComponents();
         this.source = source;
-        //this.router = source.getRouter();
+        this.router = source.getRouter();
         ImageIcon icon = new ImageIcon("logo.png");
         this.setIconImage(icon.getImage());
     }
@@ -171,12 +174,24 @@ public class LoginFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_SignUpButtonMouseExited
 
     private void LoginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginButtonActionPerformed
-        this.setVisible(false);
-        new UserFrame(this).setVisible(true);
+        try {
+            String email = EmailTextField.getText();
+            String password = new String(PasswordTextField.getPassword());
+            User user = router.login(email, password);
+            new UserFrame(source, this, user).setVisible(true);
+            this.EmailTextField.setText("");
+            this.PasswordTextField.setText("");
+            this.setVisible(false);
+        } catch(ControlException ex){
+            NewView.displayError(this, ex);
+        }
+        
+        /*this.setVisible(false);
+        new UserFrame(this).setVisible(true);*/
     }//GEN-LAST:event_LoginButtonActionPerformed
 
     private void SignUpButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SignUpButtonActionPerformed
-        new SignUpDialog(this).setVisible(true);
+        new SignUpDialog(source,this).setVisible(true);
     }//GEN-LAST:event_SignUpButtonActionPerformed
 
 

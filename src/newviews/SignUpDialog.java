@@ -5,22 +5,27 @@
  */
 package newviews;
 
+import control.ControlException;
+import control.IRouter;
+import control.dtos.UserDTO;
+import view.View;
+
 
 /**
  *
  * @author Gabriel
  */
 public class SignUpDialog extends javax.swing.JDialog {
-    public SignUpDialog(newviews.LoginFrame parent) {
+    private IRouter router;
+    
+    public SignUpDialog(View source, LoginFrame parent) {
         super(parent, true);
         initComponents();
         this.setLocationRelativeTo(parent);
         this.setIconImage(parent.getIconImage());
-        //this.router = source.getRouter();
+        this.router = source.getRouter();
     }
-    /**
-     * Creates new form SignUpDialog
-     */
+    
     
 
     /**
@@ -41,7 +46,7 @@ public class SignUpDialog extends javax.swing.JDialog {
         EmailTextField = new javax.swing.JTextField();
         AsanaidTextField = new javax.swing.JTextField();
         SignUpLabel = new javax.swing.JLabel();
-        LoginButton = new javax.swing.JButton();
+        SignUpButton = new javax.swing.JButton();
         PasswordTextField = new javax.swing.JPasswordField();
         jSeparator1 = new javax.swing.JSeparator();
 
@@ -87,18 +92,18 @@ public class SignUpDialog extends javax.swing.JDialog {
         SignUpLabel.setForeground(new java.awt.Color(255, 255, 255));
         SignUpLabel.setText("Sign Up Form");
 
-        LoginButton.setBackground(new java.awt.Color(255, 102, 0));
-        LoginButton.setFont(new java.awt.Font("Proxima Nova Rg", 0, 16)); // NOI18N
-        LoginButton.setForeground(new java.awt.Color(255, 255, 255));
-        LoginButton.setText("Sign Up");
-        LoginButton.setBorder(null);
-        LoginButton.setBorderPainted(false);
-        LoginButton.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        LoginButton.setDebugGraphicsOptions(javax.swing.DebugGraphics.NONE_OPTION);
-        LoginButton.setFocusPainted(false);
-        LoginButton.addActionListener(new java.awt.event.ActionListener() {
+        SignUpButton.setBackground(new java.awt.Color(255, 102, 0));
+        SignUpButton.setFont(new java.awt.Font("Proxima Nova Rg", 0, 16)); // NOI18N
+        SignUpButton.setForeground(new java.awt.Color(255, 255, 255));
+        SignUpButton.setText("Sign Up");
+        SignUpButton.setBorder(null);
+        SignUpButton.setBorderPainted(false);
+        SignUpButton.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        SignUpButton.setDebugGraphicsOptions(javax.swing.DebugGraphics.NONE_OPTION);
+        SignUpButton.setFocusPainted(false);
+        SignUpButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                LoginButtonActionPerformed(evt);
+                SignUpButtonActionPerformed(evt);
             }
         });
 
@@ -125,7 +130,7 @@ public class SignUpDialog extends javax.swing.JDialog {
                         .addGap(140, 140, 140))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, SignUpPanelLayout.createSequentialGroup()
                         .addGroup(SignUpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(LoginButton, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(SignUpButton, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(SignUpPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                 .addGroup(SignUpPanelLayout.createSequentialGroup()
                                     .addComponent(NameLabel)
@@ -172,7 +177,7 @@ public class SignUpDialog extends javax.swing.JDialog {
                     .addComponent(PasswordLabel)
                     .addComponent(PasswordTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addComponent(LoginButton, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(SignUpButton, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(84, 84, 84))
         );
 
@@ -190,9 +195,22 @@ public class SignUpDialog extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void LoginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginButtonActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_LoginButtonActionPerformed
+    private void SignUpButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SignUpButtonActionPerformed
+        try{
+            String name = NameTextField.getText();
+            String email = EmailTextField.getText();
+            Long asanaID = Long.parseLong(AsanaidTextField.getText());
+            String password = new String(PasswordTextField.getPassword());
+            UserDTO user = new UserDTO(name, email, password, asanaID);
+            router.registerUser(user);
+            NewView.displayInfo(this, "Signed up correctly.");
+            this.dispose();
+        } catch(NumberFormatException ex) {
+            NewView.displayError(this, "The \"Asana ID\" field must include a valid number.");
+        } catch(ControlException ex) {
+            NewView.displayError(this, ex);
+        }
+    }//GEN-LAST:event_SignUpButtonActionPerformed
 
     private void AsanaidTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AsanaidTextFieldActionPerformed
         // TODO add your handling code here:
@@ -216,11 +234,11 @@ public class SignUpDialog extends javax.swing.JDialog {
     private javax.swing.JTextField AsanaidTextField;
     private javax.swing.JLabel EmailLabel2;
     private javax.swing.JTextField EmailTextField;
-    private javax.swing.JButton LoginButton;
     private javax.swing.JLabel NameLabel;
     private javax.swing.JTextField NameTextField;
     private javax.swing.JLabel PasswordLabel;
     private javax.swing.JPasswordField PasswordTextField;
+    private javax.swing.JButton SignUpButton;
     private javax.swing.JLabel SignUpLabel;
     private javax.swing.JPanel SignUpPanel;
     private javax.swing.JSeparator jSeparator1;
