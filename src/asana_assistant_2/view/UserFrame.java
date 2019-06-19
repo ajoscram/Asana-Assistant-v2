@@ -56,6 +56,9 @@ public class UserFrame extends javax.swing.JFrame {
         this.SincronizeIcon.setVisible(false);
         this.CollaboratorsIcon.setVisible(false);
         this.CollaboratorsTabbedPane.setVisible(false);
+        this.NombreFiltrosPanel.setVisible(false);
+        this.TasksPanel.setVisible(false);
+        this.InfoCalendarPanel.setVisible(false);
     }
 
     @SuppressWarnings("unchecked")
@@ -173,9 +176,12 @@ public class UserFrame extends javax.swing.JFrame {
 
         ProjectsIcon.setFont(new java.awt.Font("Proxima Nova Rg", 0, 24)); // NOI18N
         ProjectsIcon.setForeground(new java.awt.Color(255, 255, 255));
-        ProjectsIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/projects.png"))); // NOI18N
+        ProjectsIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/project_icon.png"))); // NOI18N
         ProjectsIcon.setText("Close");
         ProjectsIcon.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                ProjectsIconMouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 ProjectsIconMouseEntered(evt);
             }
@@ -382,11 +388,6 @@ public class UserFrame extends javax.swing.JFrame {
 
         jList1.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
         jList1.setForeground(new java.awt.Color(85, 96, 115));
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
         jList1.setSelectionBackground(new java.awt.Color(255, 102, 0));
         jList1.setSelectionForeground(new java.awt.Color(243, 242, 242));
         DevelopmentsScrollpane.setViewportView(jList1);
