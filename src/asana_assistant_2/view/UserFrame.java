@@ -73,11 +73,14 @@ public class UserFrame extends javax.swing.JFrame {
             this.NombreProyectoLabel.setText(project.getName());
             
             //populating collaborators
-            reloadCollaboratorLists(id);
+            reloadCollaboratorLists(project);
             
             //populating filters
-            reloadFilters();
+            reloadFilters(project);
             resetFilters();
+            
+            //poulating tasks tree
+            reloadTasks(project, TaskFilter.EMPTY);
             
             //enabling everything
             this.ProjectsIcon.setText("Close");
@@ -98,7 +101,7 @@ public class UserFrame extends javax.swing.JFrame {
         this.TaskComboBox.setSelectedItem(null);
     }
     
-    private void reloadFilters(){
+    private void reloadFilters(Project project){
         try{
             List<DisplayString> tasks = router.getTaskStrings(project.getId());
             TaskComboBox.removeAllItems();
@@ -117,10 +120,10 @@ public class UserFrame extends javax.swing.JFrame {
         }
     }
     
-    private void reloadCollaboratorLists(long project_id){
+    private void reloadCollaboratorLists(Project project){
         try{
-            List<DisplayString> activeCollaborators = router.getActiveUserStrings(project_id);
-            List<DisplayString> bannedCollaborators = router.getBannedUserStrings(project_id);
+            List<DisplayString> activeCollaborators = router.getActiveUserStrings(project.getId());
+            List<DisplayString> bannedCollaborators = router.getBannedUserStrings(project.getId());
             
             this.activeCollaboratorsListModel.clear();
             for(DisplayString collaborator : activeCollaborators)
@@ -141,7 +144,7 @@ public class UserFrame extends javax.swing.JFrame {
         return node;
     }
     
-    private void filterTasks(TaskFilter filter){
+    private void reloadTasks(Project project, TaskFilter filter){
         try{
             if(project != null){
                 DefaultMutableTreeNode root = (DefaultMutableTreeNode)tasksTreeModel.getRoot();
@@ -165,7 +168,7 @@ public class UserFrame extends javax.swing.JFrame {
         else{
             try {
                 router.banUser(project.getId(), collaborator.getId());
-                reloadCollaboratorLists(project.getId());
+                reloadCollaboratorLists(project);
             } catch (ControlException ex) {
                 DefaultView.displayError(this, ex);
             }
@@ -179,7 +182,7 @@ public class UserFrame extends javax.swing.JFrame {
         else{
             try {
                 router.unbanUser(project.getId(), collaborator.getId());
-                reloadCollaboratorLists(project.getId());
+                reloadCollaboratorLists(project);
             } catch (ControlException ex) {
                 DefaultView.displayError(this, ex);
             }
