@@ -68,7 +68,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
                       <Component id="TasksPanel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
                       <Component id="InfoCalendarPanel" max="32767" attributes="0"/>
                   </Group>
                   <Component id="NombreFiltrosPanel" pref="970" max="32767" attributes="0"/>
@@ -137,8 +137,8 @@
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="CollaboratorsIcon" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
-                  <Component id="CollaboratorsTabbedPane" min="-2" pref="416" max="-2" attributes="0"/>
-                  <EmptySpace max="32767" attributes="0"/>
+                  <Component id="CollaboratorsTabbedPane" max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -157,11 +157,6 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Collaborators"/>
           </Properties>
-          <Events>
-            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="CollaboratorsIconMouseClicked"/>
-            <EventHandler event="mouseEntered" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="CollaboratorsIconMouseEntered"/>
-            <EventHandler event="mouseExited" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="CollaboratorsIconMouseExited"/>
-          </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="LogoLabel">
           <Properties>
@@ -307,6 +302,7 @@
             <Property name="text" type="java.lang.String" value="Synchronize"/>
           </Properties>
           <Events>
+            <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="SincronizeIconMouseClicked"/>
             <EventHandler event="mouseEntered" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="SincronizeIconMouseEntered"/>
             <EventHandler event="mouseExited" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="SincronizeIconMouseExited"/>
           </Events>
@@ -586,6 +582,9 @@
                   <TreeModel code=""/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="valueChanged" listener="javax.swing.event.TreeSelectionListener" parameters="javax.swing.event.TreeSelectionEvent" handler="TasksTreeValueChanged"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>
@@ -616,16 +615,16 @@
                       </Group>
                       <Group type="102" alignment="0" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="DevelopmentsScrollpane" alignment="0" pref="373" max="32767" attributes="0"/>
+                              <Component id="DevelopmentsScrollpane" alignment="0" pref="376" max="32767" attributes="0"/>
                               <Component id="DevelopmentsLabel" alignment="0" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" attributes="0">
                                   <Component id="EvidenceLabel" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace min="0" pref="164" max="32767" attributes="0"/>
+                                  <EmptySpace min="0" pref="167" max="32767" attributes="0"/>
                               </Group>
-                              <Component id="EvidenceScrollPane" pref="246" max="32767" attributes="0"/>
+                              <Component id="EvidenceScrollPane" pref="249" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace min="-2" max="-2" attributes="0"/>
                       </Group>

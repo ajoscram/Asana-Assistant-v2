@@ -2,27 +2,37 @@ package asana_assistant_2.view;
 
 import asana_assistant_1.control.ControlException;
 import asana_assistant_1.control.IRouter;
+import asana_assistant_1.control.JSONTaskParser;
 import asana_assistant_1.control.dtos.DisplayString;
 import asana_assistant_1.control.dtos.TaskFilter;
 import asana_assistant_1.model.Project;
+import asana_assistant_1.model.Task;
 import asana_assistant_1.model.User;
+import asana_assistant_1.parse.ParseException;
 import asana_assistant_1.view.DefaultView;
 import asana_assistant_1.view.TaskTreeCellRenderer;
 import asana_assistant_1.view.View;
+import asana_assistant_2.control.CSVTaskParser;
+import java.awt.Frame;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
 public class UserFrame extends javax.swing.JFrame {
+    private static final String JSON_DESCRIPTION = "JSON (.json)";
+    private static final String CSV_DESCRIPTION = "CSV (.csv)";
     
     private LoginFrame parent;
     private IRouter router;
     private View source;
     private User user;
     private Project project;
+    private Task task;
     
     private final DefaultListModel activeCollaboratorsListModel;
     private final DefaultListModel bannedCollaboratorsListModel;
@@ -33,6 +43,7 @@ public class UserFrame extends javax.swing.JFrame {
         this.setLocationRelativeTo(parent);
         this.setIconImage(parent.getIconImage());
         this.setTitle(user.getName() + " | " + user.getEmail());
+        this.setExtendedState(this.getExtendedState() | Frame.MAXIMIZED_BOTH);
         this.parent = parent;
         this.source = source;
         this.router = source.getRouter();
@@ -189,6 +200,61 @@ public class UserFrame extends javax.swing.JFrame {
         }
     }
     
+    private void openSelectedTask(){
+        try{
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode)TasksTree.getLastSelectedPathComponent();
+            if (node == null){
+                this.InfoCalendarPanel.setVisible(false);
+                this.task = null;
+            }
+            else{
+                DisplayString taskString = (DisplayString)node.getUserObject();
+                task = router.getTask(taskString.getId());
+                DisplayString asignee = router.getAsigneeString(task.getId());
+                
+                NombreTareaLabel.setText(task.getName());
+                
+                if(asignee == null)
+                    AsignadoLabel.setText("Unassigned");
+                else
+                    AsignadoLabel.setText(asignee.toString());
+                
+                this.InfoCalendarPanel.setVisible(true);
+            }
+        } catch(ControlException ex){
+            View.displayError(this, ex);
+        }
+    }
+    
+    private void synchronizeTasks(){
+        if(DefaultView.displayConfirm(this, "Synchronizing tasks is permanent.\nDo you wish to continue?")){
+            JFileChooser chooser  = new JFileChooser();
+            chooser.setDialogTitle("Select Tasks File");
+            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            chooser.addChoosableFileFilter(new FileNameExtensionFilter(JSON_DESCRIPTION, "json"));
+            chooser.addChoosableFileFilter(new FileNameExtensionFilter(CSV_DESCRIPTION, "csv"));
+            chooser.setAcceptAllFileFilterUsed(false);
+            if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
+            {
+                try{
+                    String file = chooser.getSelectedFile().getAbsolutePath();
+                    if(chooser.getFileFilter().getDescription().equals(JSON_DESCRIPTION))
+                        router.synchronize(project.getId(), file, new JSONTaskParser());
+                    else if(chooser.getFileFilter().getDescription().equals(CSV_DESCRIPTION))
+                        router.synchronize(project.getId(), file, new CSVTaskParser());
+                    reloadFilters(project);
+                    reloadTasks(project, TaskFilter.EMPTY);
+                    reloadCollaboratorLists(project);
+                    DefaultView.displayInfo(this, "Tasks synchronized successfullly.");
+                } catch(ControlException ex){
+                    DefaultView.displayError(this, ex);
+                } catch(ParseException ex){
+                    DefaultView.displayError(this, ex);
+                }
+            }
+        }
+    }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -263,17 +329,6 @@ public class UserFrame extends javax.swing.JFrame {
         CollaboratorsIcon.setForeground(new java.awt.Color(255, 255, 255));
         CollaboratorsIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/collaborators_userframe.png"))); // NOI18N
         CollaboratorsIcon.setText("Collaborators");
-        CollaboratorsIcon.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                CollaboratorsIconMouseClicked(evt);
-            }
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                CollaboratorsIconMouseEntered(evt);
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                CollaboratorsIconMouseExited(evt);
-            }
-        });
 
         LogoLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/logouserframe.png"))); // NOI18N
 
@@ -316,6 +371,9 @@ public class UserFrame extends javax.swing.JFrame {
         SincronizeIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/synchronizeuserframe.png"))); // NOI18N
         SincronizeIcon.setText("Synchronize");
         SincronizeIcon.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                SincronizeIconMouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 SincronizeIconMouseEntered(evt);
             }
@@ -387,8 +445,8 @@ public class UserFrame extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(CollaboratorsIcon)
                 .addGap(18, 18, 18)
-                .addComponent(CollaboratorsTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 416, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(CollaboratorsTabbedPane)
+                .addContainerGap())
         );
 
         NombreFiltrosPanel.setBackground(new java.awt.Color(255, 255, 255));
@@ -513,6 +571,11 @@ public class UserFrame extends javax.swing.JFrame {
 
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
         TasksTree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
+        TasksTree.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
+            public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
+                TasksTreeValueChanged(evt);
+            }
+        });
         TreeTaskScrollPane.setViewportView(TasksTree);
 
         javax.swing.GroupLayout TasksPanelLayout = new javax.swing.GroupLayout(TasksPanel);
@@ -586,14 +649,14 @@ public class UserFrame extends javax.swing.JFrame {
                         .addGap(29, 29, 29))
                     .addGroup(InfoCalendarPanelLayout.createSequentialGroup()
                         .addGroup(InfoCalendarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(DevelopmentsScrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 373, Short.MAX_VALUE)
+                            .addComponent(DevelopmentsScrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
                             .addComponent(DevelopmentsLabel))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(InfoCalendarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(InfoCalendarPanelLayout.createSequentialGroup()
                                 .addComponent(EvidenceLabel)
-                                .addGap(0, 164, Short.MAX_VALUE))
-                            .addComponent(EvidenceScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 246, Short.MAX_VALUE))
+                                .addGap(0, 167, Short.MAX_VALUE))
+                            .addComponent(EvidenceScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 249, Short.MAX_VALUE))
                         .addContainerGap())))
         );
         InfoCalendarPanelLayout.setVerticalGroup(
@@ -623,7 +686,7 @@ public class UserFrame extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(TasksPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(0, 0, 0)
                         .addComponent(InfoCalendarPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(NombreFiltrosPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 970, Short.MAX_VALUE)))
         );
@@ -641,45 +704,27 @@ public class UserFrame extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void CollaboratorsIconMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_CollaboratorsIconMouseEntered
-        
-    }//GEN-LAST:event_CollaboratorsIconMouseEntered
-
-    private void CollaboratorsIconMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_CollaboratorsIconMouseExited
-        
-    }//GEN-LAST:event_CollaboratorsIconMouseExited
-
-    private void CollaboratorsIconMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_CollaboratorsIconMouseClicked
-        // TODO add your handling code here:
-    }//GEN-LAST:event_CollaboratorsIconMouseClicked
-
     private void ByDateIconMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ByDateIconMouseEntered
-        //ByDateIcon.setForeground(java.awt.Color.decode("#0099FF"));
         ByDateIcon.setIcon(new ImageIcon("assets/bydate2.png"));
     }//GEN-LAST:event_ByDateIconMouseEntered
 
     private void ByActivityIconMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ByActivityIconMouseEntered
-        //ByActivityIcon.setForeground(java.awt.Color.decode("#0099FF"));
         ByActivityIcon.setIcon(new ImageIcon("assets/bytask2.png"));
     }//GEN-LAST:event_ByActivityIconMouseEntered
 
     private void ByCollaboratorIconMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ByCollaboratorIconMouseEntered
-        //ByCollaboratorIcon.setForeground(java.awt.Color.decode("#0099FF"));
         ByCollaboratorIcon.setIcon(new ImageIcon("assets/bycollaborator2.png"));
     }//GEN-LAST:event_ByCollaboratorIconMouseEntered
 
     private void ByDateIconMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ByDateIconMouseExited
-        //ByDateIcon.setForeground(java.awt.Color.decode("#1D2634"));
         ByDateIcon.setIcon(new ImageIcon("assets/bydate.png"));
     }//GEN-LAST:event_ByDateIconMouseExited
 
     private void ByActivityIconMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ByActivityIconMouseExited
-        //ByActivityIcon.setForeground(java.awt.Color.decode("#1D2634"));
         ByActivityIcon.setIcon(new ImageIcon("assets/bytask.png"));
     }//GEN-LAST:event_ByActivityIconMouseExited
 
     private void ByCollaboratorIconMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ByCollaboratorIconMouseExited
-        //ByCollaboratorIcon.setForeground(java.awt.Color.decode("#1D2634"));
         ByCollaboratorIcon.setIcon(new ImageIcon("assets/bycollaborator.png"));
     }//GEN-LAST:event_ByCollaboratorIconMouseExited
 
@@ -708,7 +753,10 @@ public class UserFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_SincronizeIconMouseExited
 
     private void ProjectsIconMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProjectsIconMouseClicked
-        new ProjectDialog(source,this,user).setVisible(true);
+        if(project == null)
+            new ProjectDialog(source,this,user).setVisible(true);
+        else
+            closeProject();
     }//GEN-LAST:event_ProjectsIconMouseClicked
 
     private void banCollaboratorMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_banCollaboratorMenuItemActionPerformed
@@ -718,6 +766,14 @@ public class UserFrame extends javax.swing.JFrame {
     private void unbanCollaboratorMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unbanCollaboratorMenuItemActionPerformed
         unbanSelectedCollaborator();
     }//GEN-LAST:event_unbanCollaboratorMenuItemActionPerformed
+
+    private void TasksTreeValueChanged(javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_TasksTreeValueChanged
+        openSelectedTask();
+    }//GEN-LAST:event_TasksTreeValueChanged
+
+    private void SincronizeIconMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SincronizeIconMouseClicked
+        synchronizeTasks();
+    }//GEN-LAST:event_SincronizeIconMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList ActiveList;
