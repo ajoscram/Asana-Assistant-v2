@@ -5,18 +5,86 @@
  */
 package asana_assistant_2.view;
 
+import asana_assistant_1.control.ControlException;
+import asana_assistant_1.control.IRouter;
+import asana_assistant_1.control.dtos.DevelopmentDTO;
+import asana_assistant_1.model.Task;
+import asana_assistant_1.view.View;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
+import javax.swing.DefaultListModel;
+import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
+import javax.swing.JSpinner;
+import javax.swing.text.NumberFormatter;
+
 /**
  *
  * @author Gabriel
  */
-public class AddDevelopmentDialog extends javax.swing.JDialog {
-
-    /**
-     * Creates new form AddDevelopmentDialog
-     */
-    public AddDevelopmentDialog(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+class AddDevelopmentDialog extends javax.swing.JDialog {
+    private UserFrame parent;
+    private IRouter router;
+    private Task task;
+    private DefaultListModel evidenceListModel;
+    
+    public AddDevelopmentDialog(View source, UserFrame parent, Task task, Date date) {
+        super(parent, true);
         initComponents();
+        this.setLocationRelativeTo(parent);
+        this.setIconImage(parent.getIconImage());
+        this.setTitle("New Development");
+        
+        this.parent = parent;
+        this.router = source.getRouter();
+        this.task = task;
+        
+        this.evidenceListModel = new DefaultListModel();
+        this.EvidenceList.setModel(evidenceListModel);
+        this.DateChooser.setDate(date);
+        this.DateChooser.getDateEditor().setEnabled(false);
+        JFormattedTextField hoursTextField = ((JSpinner.NumberEditor)this.HoursSpinner.getEditor()).getTextField();
+        ((NumberFormatter)hoursTextField.getFormatter()).setAllowsInvalid(false);
+    }
+    private void addEvidence(){
+        JFileChooser chooser  = new JFileChooser();
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
+        {
+            String filename = chooser.getSelectedFile().getAbsolutePath();
+            evidenceListModel.addElement(filename);
+        }
+    }
+    private void removeEvidence(){
+        String string = EvidenceList.getSelectedValue();
+        if(string == null)
+            NewView.displayError(this, "You must select an evidence entry to remove.");
+        else
+            evidenceListModel.removeElement(string);
+    }
+    private void addDevelopment(){
+        try{
+            if(NewView.displayConfirm(this, "Adding a development is non-reversible.\nDo you want to save your changes?")){
+                LocalDate date = DateChooser.getDate()
+                        .toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate();
+                int hours = (Integer)HoursSpinner.getValue();
+                String description = DescriptionTextArea.getText();
+                ArrayList<String> evidence = new ArrayList();
+                for(Object evidence_ : evidenceListModel.toArray())
+                    evidence.add((String)evidence_);
+                DevelopmentDTO development = new DevelopmentDTO(date, hours, description, evidence);
+                router.addDevelopment(task.getId(), development);
+                NewView.displayInfo(this, "Development added successfully.");
+                //parent.resetDevelopmentFilters();
+                this.dispose();
+            }
+        } catch(ControlException ex) {
+            NewView.displayError(this, ex);
+        }   
     }
 
     /**
@@ -31,18 +99,18 @@ public class AddDevelopmentDialog extends javax.swing.JDialog {
         jPanel1 = new javax.swing.JPanel();
         ProjectNameLabel1 = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
-        jDateChooser1 = new com.toedter.calendar.JDateChooser();
+        DateChooser = new com.toedter.calendar.JDateChooser();
         ProjectNameLabel2 = new javax.swing.JLabel();
-        jSpinner1 = new javax.swing.JSpinner();
+        HoursSpinner = new javax.swing.JSpinner();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        DescriptionTextArea = new javax.swing.JTextArea();
         ProjectNameLabel3 = new javax.swing.JLabel();
         ProjectNameLabel4 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
+        EvidenceList = new javax.swing.JList<>();
         AddButton = new javax.swing.JButton();
-        AddButton1 = new javax.swing.JButton();
-        AddButton2 = new javax.swing.JButton();
+        RemoveButton = new javax.swing.JButton();
+        AddDevelopmentButton = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         ProjectNameLabel = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
@@ -56,19 +124,19 @@ public class AddDevelopmentDialog extends javax.swing.JDialog {
         ProjectNameLabel1.setForeground(new java.awt.Color(255, 255, 255));
         ProjectNameLabel1.setText("Date:");
 
-        jDateChooser1.setForeground(new java.awt.Color(85, 96, 115));
+        DateChooser.setForeground(new java.awt.Color(85, 96, 115));
 
         ProjectNameLabel2.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
         ProjectNameLabel2.setForeground(new java.awt.Color(255, 255, 255));
         ProjectNameLabel2.setText("Hours Of Work: ");
 
-        jSpinner1.setFont(new java.awt.Font("Proxima Nova Rg", 0, 13)); // NOI18N
+        HoursSpinner.setFont(new java.awt.Font("Proxima Nova Rg", 0, 13)); // NOI18N
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
-        jTextArea1.setForeground(new java.awt.Color(29, 38, 52));
-        jTextArea1.setRows(5);
-        jScrollPane1.setViewportView(jTextArea1);
+        DescriptionTextArea.setColumns(20);
+        DescriptionTextArea.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
+        DescriptionTextArea.setForeground(new java.awt.Color(29, 38, 52));
+        DescriptionTextArea.setRows(5);
+        jScrollPane1.setViewportView(DescriptionTextArea);
 
         ProjectNameLabel3.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
         ProjectNameLabel3.setForeground(new java.awt.Color(255, 255, 255));
@@ -78,16 +146,16 @@ public class AddDevelopmentDialog extends javax.swing.JDialog {
         ProjectNameLabel4.setForeground(new java.awt.Color(255, 255, 255));
         ProjectNameLabel4.setText("Evidence:");
 
-        jList1.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
-        jList1.setForeground(new java.awt.Color(29, 38, 52));
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
+        EvidenceList.setFont(new java.awt.Font("Proxima Nova Rg", 0, 14)); // NOI18N
+        EvidenceList.setForeground(new java.awt.Color(29, 38, 52));
+        EvidenceList.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
-        jList1.setSelectionBackground(new java.awt.Color(255, 102, 0));
-        jList1.setSelectionForeground(new java.awt.Color(243, 242, 242));
-        jScrollPane2.setViewportView(jList1);
+        EvidenceList.setSelectionBackground(new java.awt.Color(255, 102, 0));
+        EvidenceList.setSelectionForeground(new java.awt.Color(243, 242, 242));
+        jScrollPane2.setViewportView(EvidenceList);
 
         AddButton.setBackground(new java.awt.Color(85, 96, 115));
         AddButton.setFont(new java.awt.Font("Proxima Nova Rg", 0, 16)); // NOI18N
@@ -104,33 +172,33 @@ public class AddDevelopmentDialog extends javax.swing.JDialog {
             }
         });
 
-        AddButton1.setBackground(new java.awt.Color(85, 96, 115));
-        AddButton1.setFont(new java.awt.Font("Proxima Nova Rg", 0, 16)); // NOI18N
-        AddButton1.setForeground(new java.awt.Color(255, 255, 255));
-        AddButton1.setText("Remove");
-        AddButton1.setBorder(null);
-        AddButton1.setBorderPainted(false);
-        AddButton1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        AddButton1.setDebugGraphicsOptions(javax.swing.DebugGraphics.NONE_OPTION);
-        AddButton1.setFocusPainted(false);
-        AddButton1.addActionListener(new java.awt.event.ActionListener() {
+        RemoveButton.setBackground(new java.awt.Color(85, 96, 115));
+        RemoveButton.setFont(new java.awt.Font("Proxima Nova Rg", 0, 16)); // NOI18N
+        RemoveButton.setForeground(new java.awt.Color(255, 255, 255));
+        RemoveButton.setText("Remove");
+        RemoveButton.setBorder(null);
+        RemoveButton.setBorderPainted(false);
+        RemoveButton.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        RemoveButton.setDebugGraphicsOptions(javax.swing.DebugGraphics.NONE_OPTION);
+        RemoveButton.setFocusPainted(false);
+        RemoveButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                AddButton1ActionPerformed(evt);
+                RemoveButtonActionPerformed(evt);
             }
         });
 
-        AddButton2.setBackground(new java.awt.Color(255, 102, 0));
-        AddButton2.setFont(new java.awt.Font("Proxima Nova Rg", 0, 16)); // NOI18N
-        AddButton2.setForeground(new java.awt.Color(255, 255, 255));
-        AddButton2.setText("Add Develpment");
-        AddButton2.setBorder(null);
-        AddButton2.setBorderPainted(false);
-        AddButton2.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        AddButton2.setDebugGraphicsOptions(javax.swing.DebugGraphics.NONE_OPTION);
-        AddButton2.setFocusPainted(false);
-        AddButton2.addActionListener(new java.awt.event.ActionListener() {
+        AddDevelopmentButton.setBackground(new java.awt.Color(255, 102, 0));
+        AddDevelopmentButton.setFont(new java.awt.Font("Proxima Nova Rg", 0, 16)); // NOI18N
+        AddDevelopmentButton.setForeground(new java.awt.Color(255, 255, 255));
+        AddDevelopmentButton.setText("Add Develpment");
+        AddDevelopmentButton.setBorder(null);
+        AddDevelopmentButton.setBorderPainted(false);
+        AddDevelopmentButton.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        AddDevelopmentButton.setDebugGraphicsOptions(javax.swing.DebugGraphics.NONE_OPTION);
+        AddDevelopmentButton.setFocusPainted(false);
+        AddDevelopmentButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                AddButton2ActionPerformed(evt);
+                AddDevelopmentButtonActionPerformed(evt);
             }
         });
 
@@ -183,11 +251,11 @@ public class AddDevelopmentDialog extends javax.swing.JDialog {
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(ProjectNameLabel2)
                                 .addGap(27, 27, 27)
-                                .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, 245, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(HoursSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 245, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(ProjectNameLabel1)
                                 .addGap(31, 31, 31)
-                                .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, 309, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(DateChooser, javax.swing.GroupLayout.PREFERRED_SIZE, 309, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(ProjectNameLabel3)
@@ -196,7 +264,7 @@ public class AddDevelopmentDialog extends javax.swing.JDialog {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(AddButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(AddDevelopmentButton, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -207,7 +275,7 @@ public class AddDevelopmentDialog extends javax.swing.JDialog {
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                         .addComponent(AddButton, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(AddButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                        .addComponent(RemoveButton, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                         .addContainerGap(33, Short.MAX_VALUE))))
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
@@ -223,24 +291,24 @@ public class AddDevelopmentDialog extends javax.swing.JDialog {
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(DateChooser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(ProjectNameLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(HoursSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(ProjectNameLabel2))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(ProjectNameLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(ProjectNameLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(AddButton, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(AddButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(RemoveButton, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(19, 19, 19)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(10, 10, 10)
-                .addComponent(AddButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(AddDevelopmentButton, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -260,37 +328,37 @@ public class AddDevelopmentDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void AddButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddButtonActionPerformed
-        this.setVisible(false);
+        addEvidence();
     }//GEN-LAST:event_AddButtonActionPerformed
 
-    private void AddButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_AddButton1ActionPerformed
+    private void RemoveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RemoveButtonActionPerformed
+        removeEvidence();
+    }//GEN-LAST:event_RemoveButtonActionPerformed
 
-    private void AddButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddButton2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_AddButton2ActionPerformed
+    private void AddDevelopmentButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddDevelopmentButtonActionPerformed
+        addDevelopment();
+    }//GEN-LAST:event_AddDevelopmentButtonActionPerformed
 
    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton AddButton;
-    private javax.swing.JButton AddButton1;
-    private javax.swing.JButton AddButton2;
+    private javax.swing.JButton AddDevelopmentButton;
+    private com.toedter.calendar.JDateChooser DateChooser;
+    private javax.swing.JTextArea DescriptionTextArea;
+    private javax.swing.JList<String> EvidenceList;
+    private javax.swing.JSpinner HoursSpinner;
     private javax.swing.JLabel ProjectNameLabel;
     private javax.swing.JLabel ProjectNameLabel1;
     private javax.swing.JLabel ProjectNameLabel2;
     private javax.swing.JLabel ProjectNameLabel3;
     private javax.swing.JLabel ProjectNameLabel4;
-    private com.toedter.calendar.JDateChooser jDateChooser1;
-    private javax.swing.JList<String> jList1;
+    private javax.swing.JButton RemoveButton;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JSpinner jSpinner1;
-    private javax.swing.JTextArea jTextArea1;
     // End of variables declaration//GEN-END:variables
 }

@@ -59,13 +59,14 @@ public class LoginFrame extends javax.swing.JFrame {
         EmailLabel.setText("Email:");
 
         EmailTextField.setFont(new java.awt.Font("Proxima Nova Rg", 0, 16)); // NOI18N
+        EmailTextField.setText("ajoscram@gmail.com");
 
         PasswordLabel.setFont(new java.awt.Font("Proxima Nova Lt", 0, 20)); // NOI18N
         PasswordLabel.setForeground(new java.awt.Color(255, 255, 255));
         PasswordLabel.setText("Password:");
 
         PasswordTextField.setFont(new java.awt.Font("Proxima Nova Rg", 0, 16)); // NOI18N
-        PasswordTextField.setText("password");
+        PasswordTextField.setText("1234");
 
         LoginButton.setBackground(new java.awt.Color(255, 102, 0));
         LoginButton.setFont(new java.awt.Font("Proxima Nova Rg", 0, 16)); // NOI18N
