@@ -133,6 +133,8 @@ public class UserFrame extends javax.swing.JFrame {
             }
         });
 
+        LogoLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/logouserframe.png"))); // NOI18N
+
         CollaboratorsTabbedPane.setBackground(new java.awt.Color(255, 255, 255));
         CollaboratorsTabbedPane.setForeground(new java.awt.Color(29, 38, 52));
         CollaboratorsTabbedPane.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
@@ -323,7 +325,7 @@ public class UserFrame extends javax.swing.JFrame {
             NombreFiltrosPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(NombreFiltrosPanelLayout.createSequentialGroup()
                 .addGap(10, 10, 10)
-                .addComponent(NombreProyectoLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
+                .addComponent(NombreProyectoLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 49, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(NombreFiltrosPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(ByActivityIcon, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -466,7 +468,7 @@ public class UserFrame extends javax.swing.JFrame {
                         .addComponent(TasksPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(InfoCalendarPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(NombreFiltrosPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 970, Short.MAX_VALUE)))
+                    .addComponent(NombreFiltrosPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 968, Short.MAX_VALUE)))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
